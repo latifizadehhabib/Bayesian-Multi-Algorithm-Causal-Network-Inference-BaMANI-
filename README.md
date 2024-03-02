@@ -13,11 +13,11 @@ Customizable Filtering: Enables users to filter potential arcs based on strength
 Installation
 Clone the repository to your local machine:
 
-git clone https://github.com/yourgithubusername/BaMANI.git
+'git clone https://github.com/yourgithubusername/BaMANI.git'
 
 Navigate into the BaMANI directory:
 
-cd BaMANI
+'cd BaMANI'
 
 (Include instructions on how to set up and start BaMANI, such as installing dependencies, environment setup, etc.)
 
