@@ -40,12 +40,3 @@ Utilize both the blacklist and whitelist to refine the network's structure.
 Review the final network for consistency with domain knowledge.
 (Adjust the usage steps based on how users interact with your software, including command-line arguments, configuration files, etc.)
 
-Contributing
-We welcome contributions to BaMANI! If you'd like to contribute, please fork the repository and use a feature branch. Pull requests are warmly welcome.
-
-Support
-If you encounter any problems or have questions, please submit an issue on the GitHub issue tracker.
-
-License
-(Include license information here, or simply state "Please see the LICENSE file for more details.")
-
