@@ -17,11 +17,11 @@ For the local machine: Run the "app.R" code
 Installation
 Clone the repository to your local machine:
 
-'git clone https://github.com/KlinkeLab/BaMANI.git'
+git clone https://github.com/KlinkeLab/BaMANI.git
 -------------------------------------------------
 Navigate into the BaMANI directory:
 
-'cd BaMANI'
+cd BaMANI
 -------------------------------------------------
 
 Implementation: 
