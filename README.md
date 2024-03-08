@@ -23,9 +23,10 @@ Navigate into the BaMANI directory:
 
 'cd BaMANI'
 -------------------------------------------------
-(Include instructions on how to set up and start BaMANI, such as installing dependencies, environment setup, etc.)
 
-Usage
+Implementation: 
+-------------------------------------------------
+
 Step 1: Creating and Specifying a Blacklist
 Objective: Input a blacklist to outline prior knowledge and remove implausible arcs.
 Process: Specify nodes and arcs to be excluded based on domain knowledge.
