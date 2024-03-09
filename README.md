@@ -27,16 +27,18 @@ cd BaMANI
 Implementation: 
 -------------------------------------------------
 
-![Login Page](images/login.png "Log in Page")
+![Login Page](images/login.png "Log in Page" width="60")
 
 
-![Login Page](images/Setting.png "Setting Page")
+![Login Page](images/Setting.png "Setting Page" width="70")
 
 
 <p align="center">
   <img src="images/file_upload.png" alt="Upload Data" width="400"/>
   <img src="images/choose_dir_alg.png" alt="Choose Directed Algorithms" width="400"/>
 </p>
+
+<img src="https://example.com/image.png" alt="Example Image" title="Optional title" width="100">
 
 
 Step 1: Creating and Specifying a Blacklist
