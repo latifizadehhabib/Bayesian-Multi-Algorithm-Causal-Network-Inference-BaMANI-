@@ -74,6 +74,6 @@ Review the final network for consistency with domain knowledge. (Adjust the usag
 </p>
 
 <p align="center">
-<img src="images/27.png" alt="Conditional Probability Queries on DAG" title="Conditional Probability Queries on DAG" width="350" height="300">
+<img src="images/27.png" alt="Conditional Probability Queries on DAG" title="Conditional Probability Queries on DAG" width="400" height="300">
  </p>
 
