@@ -27,17 +27,14 @@ cd BaMANI
 Implementation: 
 -------------------------------------------------
 
-<img src="images/login.png" alt="Login Page" title="Log in Page" width="250">
-
 <img src="images/login.png" alt="Login Page" title="Log in Page" width="600" height="300">
 
-
-![Login Page](images/Setting.png "Setting Page" width="70")
+<img src="images/Setting.png" alt="Setting Page" title="Setting Page" width="600" height="300">
 
 
 <p align="center">
-  <img src="images/file_upload.png" alt="Upload Data" width="400"/>
-  <img src="images/choose_dir_alg.png" alt="Choose Directed Algorithms" width="400"/>
+  <img src="images/file_upload.png" alt="Upload Data" width="400" height="300"/>
+  <img src="images/choose_dir_alg.png" alt="Choose Directed Algorithms" width="400" height="300"/>
 </p>
 
 <img src="https://example.com/image.png" alt="Example Image" title="Optional title" width="100">
