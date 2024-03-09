@@ -65,9 +65,15 @@ The process involves setting arc strength thresholds and removing arcs that crea
 <img src="images/final_whitelist.png" alt="Setting Page" title="final_whitelist" width="300" height="300">
  </p>
 
-
 Step 4: Learning the Network Structure Utilize both the blacklist and whitelist to refine the network's structure.
 Review the final network for consistency with domain knowledge. (Adjust the usage steps based on how users interact with your software, including command-line arguments, configuration files, etc.)
 
+<p align="center">
+  <img src="images/23.png" alt="DAG Network " width="300" height="300"/>
+  <img src="images/24.png" alt="Local DAG Network" width="300" height="300"/>
+</p>
 
+<p align="center">
+<img src="images/27.png" alt="Conditional Probability Queries on DAG" title="Conditional Probability Queries on DAG" width="300" height="300">
+ </p>
 
