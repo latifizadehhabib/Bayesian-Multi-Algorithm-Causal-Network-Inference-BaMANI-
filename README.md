@@ -33,7 +33,7 @@ Process: Specify nodes and arcs to be excluded based on domain knowledge.
 
 
 <p align="center">
-<img src="images/blacklist.png" alt="blacklist" title="blacklist Page" width="300" height="300">
+<img src="images/blacklist.png" alt="blacklist" title="blacklist Page" width="200" height="300">
 </p>
 
 
