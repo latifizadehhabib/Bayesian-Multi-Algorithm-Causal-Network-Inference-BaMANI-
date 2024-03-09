@@ -33,8 +33,8 @@ Implementation:
 </p>
 
 <p align="center">
-  <img src="images/file_upload.png" alt="Upload Data" width="400" height="300"/>
-  <img src="images/choose_dir_alg.png" alt="Choose Directed Algorithms" width="400" height="300"/>
+  <img src="images/file_upload.png" alt="Upload Data" width="300" height="300"/>
+  <img src="images/choose_dir_alg.png" alt="Choose Directed Algorithms" width="300" height="300"/>
 </p>
 
 <p align="center">
