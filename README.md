@@ -26,11 +26,11 @@ cd BaMANI
 
 Implementation: 
 -------------------------------------------------
-
+<p align="center">
 <img src="images/login.png" alt="Login Page" title="Log in Page" width="600" height="300">
 
 <img src="images/Setting.png" alt="Setting Page" title="Setting Page" width="600" height="300">
-
+</p>
 
 <p align="center">
   <img src="images/file_upload.png" alt="Upload Data" width="400" height="300"/>
