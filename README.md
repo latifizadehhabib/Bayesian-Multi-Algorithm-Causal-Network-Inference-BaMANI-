@@ -61,9 +61,7 @@ The process involves setting arc strength thresholds and removing arcs that crea
 <img src="images/acyclic.png" alt="Acyclicity" title="Acyclicity check before Final whitelist" width="600" height="300">
 </p>
 
-<img src="images/final_whitelist
-.png" alt="Setting Page" title="final_whitelist
-" width="600" height="300">
+<img src="images/final_whitelist.png" alt="Setting Page" title="final_whitelist" width="600" height="300">
   
 
 
