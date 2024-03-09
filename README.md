@@ -27,6 +27,9 @@ cd BaMANI
 Implementation: 
 -------------------------------------------------
 
+![Login Page](images/login.png "Log in Page")
+
+
 Step 1: Creating and Specifying a Blacklist
 Objective: Input a blacklist to outline prior knowledge and remove implausible arcs.
 Process: Specify nodes and arcs to be excluded based on domain knowledge.
