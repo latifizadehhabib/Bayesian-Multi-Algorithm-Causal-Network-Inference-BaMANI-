@@ -30,7 +30,7 @@ Implementation:
 ![Login Page](images/login.png "Log in Page")
 
 
-![Login Page](image/Setting.png "Log in Page")
+![Login Page](image/Setting.png "Setting Page")
 
 <p align="center">
   <img src="images/login.png" alt="Login Page" width="400"/>
