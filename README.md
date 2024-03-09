@@ -27,8 +27,6 @@ cd BaMANI
 Implementation: 
 -------------------------------------------------
 
-![Login Page](images/login.png "Log in Page" width="60")
-
 <img src="images/login.png" alt="Login Page" title="Log in Page" width="250">
 
 <img src="images/login.png" alt="Login Page" title="Log in Page" width="250" height="150">
