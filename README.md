@@ -30,6 +30,9 @@ Implementation:
 ![Login Page](images/login.png "Log in Page")
 
 
+![Login Page](images/login.png "Log in Page")
+image/Setting.png
+
 Step 1: Creating and Specifying a Blacklist
 Objective: Input a blacklist to outline prior knowledge and remove implausible arcs.
 Process: Specify nodes and arcs to be excluded based on domain knowledge.
