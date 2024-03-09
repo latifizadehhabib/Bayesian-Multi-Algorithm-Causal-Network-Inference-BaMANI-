@@ -30,8 +30,13 @@ Implementation:
 ![Login Page](images/login.png "Log in Page")
 
 
-![Login Page](images/login.png "Log in Page")
-image/Setting.png
+![Login Page](image/Setting.png "Log in Page")
+
+<p align="center">
+  <img src="images/login.png" alt="Login Page" width="400"/>
+  <img src="images/setting.png" alt="Settings Page" width="400"/>
+</p>
+
 
 Step 1: Creating and Specifying a Blacklist
 Objective: Input a blacklist to outline prior knowledge and remove implausible arcs.
