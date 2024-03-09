@@ -37,7 +37,10 @@ Implementation:
   <img src="images/choose_dir_alg.png" alt="Choose Directed Algorithms" width="400" height="300"/>
 </p>
 
-<img src="https://example.com/image.png" alt="Example Image" title="Optional title" width="100">
+<p align="center">
+
+<img src="images/acyclic.png" alt="Acyclicity" title="Acyclicity check before Final whitelist" width="600" height="300">
+</p>
 
 
 Step 1: Creating and Specifying a Blacklist
