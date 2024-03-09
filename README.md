@@ -61,14 +61,13 @@ The process involves setting arc strength thresholds and removing arcs that crea
 <img src="images/acyclic.png" alt="Acyclicity" title="Acyclicity check before Final whitelist" width="600" height="300">
 </p>
 
-<img src="images/final_whitelist.png" alt="Setting Page" title="final_whitelist" width="600" height="300">
-  
+<p align="center">
+<img src="images/final_whitelist.png" alt="Setting Page" title="final_whitelist" width="300" height="300">
+ </p>
 
 
+Step 4: Learning the Network Structure Utilize both the blacklist and whitelist to refine the network's structure.
+Review the final network for consistency with domain knowledge. (Adjust the usage steps based on how users interact with your software, including command-line arguments, configuration files, etc.)
 
 
-Step 4: Learning the Network Structure
-Utilize both the blacklist and whitelist to refine the network's structure.
-Review the final network for consistency with domain knowledge.
-(Adjust the usage steps based on how users interact with your software, including command-line arguments, configuration files, etc.)
 
