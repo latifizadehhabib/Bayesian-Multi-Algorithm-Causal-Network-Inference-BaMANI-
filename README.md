@@ -26,6 +26,17 @@ cd BaMANI
 
 Implementation: 
 -------------------------------------------------
+
+Step 1: Creating and Specifying a Blacklist
+Objective: Input a blacklist to outline prior knowledge and remove implausible arcs.
+Process: Specify nodes and arcs to be excluded based on domain knowledge.
+
+
+<p align="center">
+<img src="images/blacklist.png" alt="blacklist" title="blacklist Page" width="600" height="300">
+</p>
+
+
 <p align="center">
 <img src="images/login.png" alt="Login Page" title="Log in Page" width="600" height="300">
 
@@ -42,10 +53,12 @@ Implementation:
 <img src="images/acyclic.png" alt="Acyclicity" title="Acyclicity check before Final whitelist" width="600" height="300">
 </p>
 
+<img src="images/final_whitelist
+.png" alt="Setting Page" title="final_whitelist
+" width="600" height="300">
+  
 
-Step 1: Creating and Specifying a Blacklist
-Objective: Input a blacklist to outline prior knowledge and remove implausible arcs.
-Process: Specify nodes and arcs to be excluded based on domain knowledge.
+
 Step 2: Generating an Ensemble of Potential Arcs
 Upload your data file in CSV format, along with blacklist and whitelist files.
 Choose from various structure learning algorithms and proceed with 'Run Discovery'.
