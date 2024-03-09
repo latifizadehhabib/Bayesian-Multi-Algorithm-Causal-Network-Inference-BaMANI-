@@ -29,7 +29,7 @@ Implementation:
 
 <img src="images/login.png" alt="Login Page" title="Log in Page" width="250">
 
-<img src="images/login.png" alt="Login Page" title="Log in Page" width="250" height="150">
+<img src="images/login.png" alt="Login Page" title="Log in Page" width="500" height="150">
 
 
 ![Login Page](images/Setting.png "Setting Page" width="70")
