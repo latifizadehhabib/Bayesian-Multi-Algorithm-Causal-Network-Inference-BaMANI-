@@ -1,5 +1,4 @@
-
-rm(list = ls())
+rm(list = ls())        
 library(bnlearn)
 library(shiny)
 library(shinydashboard)
@@ -16,7 +15,6 @@ library(shinyalert)
 library(shinyjs)
 
 #-----------------------------------
-
 styled_title <- function(text, 
                          bgcolor = "#007BFF", 
                          color = "white", 
@@ -34,19 +32,6 @@ styled_title <- function(text,
                  text-align: center;
                  box-shadow: ', box_shadow, ';">', text, '</div>'))
 }
-
-# -----------
-# check_and_install_packages <- function(packages){
-#   
-#   # Check and install each package in list if necessary
-#   installed_packages <- rownames(installed.packages())
-#   for (package in packages) {
-#     if (!package %in% installed_packages) {
-#       install.packages(package)
-#     }
-#     library(package, character.only = TRUE)
-#   }
-# }
 # -----------
 load_required_packages <- function(packages) {
   # Load each package in list
@@ -78,17 +63,14 @@ packages <- c("purrr", "parallel", "DT","shinydashboard", "shiny","colorspace", 
 source_files <- c("data_process_Correlation.v2.R", "run_algorithm_directed.R", "run_algorithm_Undirected.R", "augmented_edge_table.R",
                   "uninformative_arcs_removal.R", "finding_threshold_values.R", 
                   
-                  "temp.white_thresh.cols.R", "temp.white_thresh.cols.v2.R",
-                  
+                  "temp.white_thresh.cols.R", 
                   "calculate_loss_npar_table.R", 
                   "calculate_bic.R", "find_min_bic.Parent_whitelist_acyclic.v3.R",
-                  "Final.DAG_network_plot_v5.R",
+                  "Final.DAG_network_plot_v6.R",
                   "DAG_network_plot.arc.lable.R", 
                   "Diagnostic_plot.v3.R",
                   "diagnostic_plot_White_Final.R", 
                   "plot_Algorithm.Count_arcs.strength.R"
-                  # "cycle_Removal_Server.R",
-                  # "cycle_Removal_UI.R"
 )#, "renderStyledTable.R"
 
 # Check and install missing packages and load source files
@@ -161,12 +143,22 @@ ui <- dashboardPage(
     }
   "))),
     # -----------
-    tags$head(tags$script(HTML("
-  $(document).on('click', '#goToTab', function() {
-    $('a[data-value=\"WhiteList_Check_acyclicity\"]').click();
-    });
-                               "))),
+  #   tags$head(tags$script(HTML("
+  # $(document).on('click', '#goToTab', function() {
+  #   $('a[data-value=\"WhiteList_Check_acyclicity\"]').click();
+  #   });
+  #                              "))),
+
+  tags$script(HTML("
+$(document).on('click', '#goToTab', function() {
+  $('a[data-value=\"WhiteList_Check_acyclicity\"]').click();
+  // Close the shinyalert dialog
+ swal.close();
+ });
+")),
+
     # -----------
+
     # Add Font Awesome link here
     tags$head(
       tags$link(rel = "stylesheet", type = "text/css", href = "https://use.fontawesome.com/releases/v5.15.1/css/all.css")
@@ -183,7 +175,8 @@ ui <- dashboardPage(
     # -----------
     tabItems(
       tabItem(tabName = "user_guide",
-              includeHTML("www/User_Guide.html")  # https://xodo.com/convert-pdf-to-html
+              #includeHTML("www/User_Guide.html")  # https://xodo.com/convert-pdf-to-html
+              tags$iframe(style="height:600px; width:100%", src="User_Guide.pdf")
       ),
       tabItem(tabName = "settings",
               fluidRow(
@@ -881,9 +874,12 @@ ui <- dashboardPage(
                                     box(
                                       # title = "Select feature",
                                       width = 3,
-                                      selectInput("selectedCellType", "Select a feature:", choices = NULL)
+                                      selectInput("userSelected_Status", "Choose Status:", choices = NULL),
+                                      selectInput("userSelected_key_feature", "Choose Key Feature:", choices = NULL),
+                                      selectInput("selectedCellType", "Select a secondary feature:", choices = NULL)
+                                      
                                       # selectInput("userSelectedCell", "Choose a Cell Type:", choices = names(data()))
-                                      # selectInput("userSelectedCell", "Choose CCN4:", choices = NULL),  # Empty 
+                                      # selectInput("userSelectedCell", "Choose col2:", choices = NULL),  # Empty 
                                       # selectInput("X.axis.cell", "Choose a Cell Type:", choices = NULL)  # Empty 
                                     ),
                                     box(
@@ -1032,6 +1028,7 @@ ui <- dashboardPage(
 # -----------------------------------
 # Define server logic
 server <- function(input, output, session) {
+ 
   
   # browser()
   # # ----------------------------------
@@ -1059,7 +1056,20 @@ server <- function(input, output, session) {
   # output$auth_output <- renderPrint({
   #   reactiveValuesToList(res_auth)
   # })
+  
   # ----------------------------------
+  
+  # Now, the logic to run Final.DAG_network_plot_v6 function upon user's selection change.
+  # Assuming Final.DAG_network_plot_v6() is a function that generates your desired plot based on the provided parameters
+  # output$contour_plot <- renderPlot({
+  #   req(input$userSelected_Status, input$userSelected_key_feature, input$selectedCellType) # Ensure all inputs are selected
+  #   # Assuming you have a function to generate the plot based on these inputs
+  #   print("yahoo")
+  #   print(plot)
+  #   plot <- Final.DAG_network_plot_v6(data(), input$userSelected_Status, input$userSelected_key_feature, input$selectedCellType)
+  #   plot # This assumes your function returns a plot object
+  # })
+  #----------------------------------
   observeEvent(input$show_nboot, {
     showModal(
       modalDialog(
@@ -1249,7 +1259,7 @@ server <- function(input, output, session) {
   
   plot_done <- reactiveVal(FALSE)
   # finished_running <- reactiveVal(FALSE)
-  
+  Status_var <- reactiveVal(NULL)  
   # -----------------------------------
   observeEvent(input$runButton, {
     print("Run Discovery clicked")
@@ -1335,7 +1345,9 @@ server <- function(input, output, session) {
           showNotification(paste("Error reading WhiteList File:", e$message), type = "error")
         })
       })
-      # -------------------
+      
+      # ------------------- main functionality 
+      
       if (isTRUE(data_uploaded()) || isTRUE(default_data_used())) {
         
         cluster <- 6
@@ -1511,8 +1523,7 @@ server <- function(input, output, session) {
         # ------------------
         # threshold <- as.numeric(sprintf("%.3f", threshold))
         temp.white_thresh.cols <- temp.white_thresh.cols(possible_seed_arcs_filter, threshold)
-        # temp.white_thresh.cols <- temp.white_thresh.cols.v2(possible_seed_arcs_filter, threshold)
-        
+
         temp_list_merge<- temp.white_thresh.cols$temp_list_merge
         augmneted.thresh.cols <- temp.white_thresh.cols$augmneted.thresh.cols
         
@@ -1627,7 +1638,7 @@ server <- function(input, output, session) {
               "<p>",
               "<span style='color: #FF0000;'>",
               # "<i class='fa fa-exclamation-triangle' style='margin-right: 6px; color: #FF0000;'></i>",
-              "<span style='font-weight: bold;'>Proceed to Further Analysis: </span>",
+              "<span style='font-weight: bold;'>Proceed to Further Analysis: </span>",  
               "</span>",
               "<br><br>",
               "<span style='font-weight: bold;'> Navigate to the tab 'WhiteList/ Check acyclicity' <a href='#' id='goToTab'>Click here</a>.",
@@ -1638,7 +1649,7 @@ server <- function(input, output, session) {
               # title = "Proceed to Further Analysis",
               text = content,
               html = TRUE,
-              # showConfirmButton = TRUE,
+              showConfirmButton = FALSE,
               # confirmButtonColor = "#3498db" # This is a shade of blue.
               # showConfirmButton = FALSE
             )
@@ -1661,7 +1672,7 @@ server <- function(input, output, session) {
           }
           Cycles
         }
-        # --------------------------------------2
+        # -------------------------------------- FIRST SECTION
         observe({
           cycles <- FindCycles(g())
           if (length(cycles) == 0) {
@@ -1691,32 +1702,108 @@ server <- function(input, output, session) {
                                                    springLength = 100,  # Adjust as needed
                                                    springConstant = 0.18))  # Adjust as needed
             })
+            
             # --------------------------------------
-            Final.DAG_network_plot_v5 <- Final.DAG_network_plot_v5 (augmented_edge_list, possible_seed_arcs_filter, data, discretized_data, final_white_list(), Black_List(), input$nboot, cl, corrcoef)
+            # Detect binary columns
+            observe({
+            req(data())
 
-            Alg.Count_arcs.strength.table <- Final.DAG_network_plot_v5$Alg.Count_arcs.strength.table
-            # plots_list <- Final.DAG_network_plot_v5$plots_list
-            plots_list(Final.DAG_network_plot_v5$plots_list)
-
-            output$DAG.Plot <- renderPlot({
-              # Final.DAG_network_plot_v5$DAG.Plot
-              Final.DAG_network_plot_v5$plotFunction()
+              binary_cols <- sapply(data(), function(x) all(x %in% c(0, 1)))
+              binary_col_names <- names(binary_cols[binary_cols])
+               print("im in 1")
+                print(binary_col_names)
+              print(length(binary_col_names))
+              if (length(binary_col_names) == 1) {
+                # If there's exactly one binary column, use it as Status
+                updateSelectInput(session, "userSelected_Status", choices = binary_col_names, selected = binary_col_names[1])
+              } else {
+                # If there are multiple binary columns, let the user choose
+                updateSelectInput(session, "userSelected_Status", choices = binary_col_names)
+              }
             })
             
-            # -----------------------------------Not Generalized  version
-            # observe({
-            #   updateSelectInput(session, "selectedCellType", choices = setdiff(names(data()), c("CCN4", "Cancer")))
-            # })
-            # -----------------------------------Not Generalized  version
-            # output$contour_plot <- renderPlot({
-            #   selectedCellType <- input$selectedCellType
-            #   plots_list[[selectedCellType]]
-            # })
-            # -----------------
-            arcs <- Final.DAG_network_plot_v5$arcs.BRCA
-            P_strength <- Final.DAG_network_plot_v5$P_strength
+            # Assuming 'data' is a reactive expression returning your dataset
+          # observe({
+          #   # Update choices for 'Choose Status:'
+          #   updateSelectInput(session, "userSelected_Status", choices = names(data()))
+          # })
+  
+  
+      observeEvent(input$userSelected_Status, {
+        # Update choices for 'Choose Key Feature:' excluding the selected 'Status'
+        valid_features <- setdiff(names(data()), input$userSelected_Status)
+        # Preserving the current selection if it's still valid, otherwise defaulting to the first valid feature
+        current_selection <- input$userSelected_key_feature
+        if(!current_selection %in% valid_features) {
+          current_selection <- valid_features[1]
+        }
+        updateSelectInput(session, "userSelected_key_feature", choices = valid_features, selected = current_selection)
+      })
+
+      observeEvent(input$userSelected_key_feature, {
+      print("Key feature changed to: ")
+      print(input$userSelected_key_feature)
+      
+      # Determine valid choices for the 'Select a secondary feature:' dropdown
+      valid_secondary_features <- setdiff(names(data()), c(input$userSelected_Status, input$userSelected_key_feature))
+      print("Valid secondary features: ")
+      print(valid_secondary_features)
+      
+      # Check if the current selection of 'Select a secondary feature:' is still valid
+      current_secondary_selection <- input$selectedCellType
+      print("Current secondary selection: ")
+      print(current_secondary_selection)
+      
+      if(!current_secondary_selection %in% valid_secondary_features) {
+        # If not valid, update to the first valid choice
+        current_secondary_selection <- valid_secondary_features[1]
+        updateSelectInput(session, "selectedCellType", choices = valid_secondary_features, selected = current_secondary_selection)
+        print("Secondary selection updated to: ")
+        print(current_secondary_selection)
+      } else {
+        # If still valid, ensure the UI is updated to reflect the current state without changing the selection
+        updateSelectInput(session, "selectedCellType", choices = valid_secondary_features, selected = current_secondary_selection)
+        print("Secondary selection remains unchanged.")
+      }
+    })
+
             
-            arc_slopes.strength <- Final.DAG_network_plot_v5$arc_slopes.strength
+            print("I AM WHITE LISTE HEREEEE")
+            print(final_white_list())
+
+            # -----------------------------------
+            observe({
+            # Ensure possible.white.list is not NULL
+            req(final_white_list())
+            Final.DAG_network_plot_v6 <- Final.DAG_network_plot_v6 (augmented_edge_list,
+                                                                    possible_seed_arcs_filter,
+                                                                    data(), discretized_data,
+                                                                    final_white_list(),
+                                                                    Black_List(),
+                                                                    input$nboot, cl,
+                                                                    corrcoef,
+                                                                    input$userSelected_Status,
+                                                                    input$userSelected_key_feature)
+            
+
+            Alg.Count_arcs.strength.table <- Final.DAG_network_plot_v6$Alg.Count_arcs.strength.table
+            # plots_list <- Final.DAG_network_plot_v6$plots_list
+            plots_list(Final.DAG_network_plot_v6$plots_list)
+            
+            
+
+            output$DAG.Plot <- renderPlot({
+              # Final.DAG_network_plot_v6$DAG.Plot
+              Final.DAG_network_plot_v6$plotFunction()
+            })
+            
+            
+            # -----------------
+            
+            arcs <- Final.DAG_network_plot_v6$arcs.BRCA
+            P_strength <- Final.DAG_network_plot_v6$P_strength
+            
+            arc_slopes.strength <- Final.DAG_network_plot_v6$arc_slopes.strength
             
             output$Diagnostic_plot <- renderPlot({
               Diagnostic_plot.v3(num.white_thresh, num_arcs.All.thresh, Total.BIC.thresh, threshold)
@@ -1727,21 +1814,17 @@ server <- function(input, output, session) {
             })
             # DAG Network Plot
             output$DAGNetworkPlot <- renderVisNetwork({
-              network <- Final.DAG_network_plot_v5$network
+              network <- Final.DAG_network_plot_v6$network
             })
-            # arc_slopes_strength <- Final.DAG_network_plot_v5$arc_slopes.strength
-            final_DAG_detail <- Final.DAG_network_plot_v5$final_DAG_detail
+            # arc_slopes_strength <- Final.DAG_network_plot_v6$arc_slopes.strength
+            final_DAG_detail <- Final.DAG_network_plot_v6$final_DAG_detail
             
             output$arc_slopes_strength <- renderStyledTable(final_DAG_detail, rownames = TRUE, download_version = c('csv', 'excel'))
-          } else {}
+            }
+            )}
         })
         # --------------------------------------2
         output$checkboxUI <- renderUI({
-          
-          print("Trying to render checkbox UI...")  # Initial log
-          print("class(g())...")  # 
-          print(class(g()))  # 
-          
           tryCatch({
             # Inside tryCatch to catch potential errors
             cycles <- FindCycles(g())
@@ -1751,7 +1834,6 @@ server <- function(input, output, session) {
               print(FindCycles(g()))
             })
             #-------------
-            
             print(paste("Number of cycles found:", length(cycles)))
             
             # Check if cycles are empty and Define output$cycleMessage
@@ -1794,9 +1876,9 @@ server <- function(input, output, session) {
           if (length(cycles) > 0) {
             # If cycles exist, render the button
             div(
-              style = "text-align: center;", 
+              style = "text-align: left;", # attention: change center to left
               actionButton(inputId = "remove", 
-                           label = tags$span(icon("fas fa-hand-pointer", style="margin-right: 4px;"), "Remove selected edges"),
+                           label = tags$span(icon("fas fa-hand-pointer", style="margin-right: 4px;"), "Remove selected edges </strong>"), # attention: added </strong>
                            style = "background-color: #3498db; color: white; padding: 10px 20px; font-size: 14px; border-radius: 5px; cursor: pointer;")
             )
           } else {            # Else, don't render anything
@@ -1867,34 +1949,81 @@ server <- function(input, output, session) {
             })
           }
 
-          Final.DAG_network_plot_v5 <- Final.DAG_network_plot_v5 (augmented_edge_list, possible_seed_arcs_filter, data, discretized_data, final_white_list(), Black_List(), input$nboot, cl, corrcoef)
+        })
+          # --------------------------------------
           
-          Alg.Count_arcs.strength.table <- Final.DAG_network_plot_v5$Alg.Count_arcs.strength.table
+          # Detect binary columns and set up Status options
+        # Detect binary columns
+        observe({
+         req(data())
+
+          binary_cols <- sapply(data(), function(x) all(x %in% c(0, 1)))
+          binary_col_names <- names(binary_cols[binary_cols])
           
-          plots_list <- Final.DAG_network_plot_v5$plots_list
-          # plots_list(Final.DAG_network_plot_v5$plots_list)
-          # DAG.Plot <- Final.DAG_network_plot_v5$DAG.Plot
+           print("im in 2")
+          print(binary_col_names)
+              print(length(binary_col_names))
+
+          if (length(binary_col_names) == 1) {
+            # If there's exactly one binary column, use it as Status
+            updateSelectInput(session, "userSelected_Status", choices = binary_col_names, selected = binary_col_names[1])
+          } else {
+            # If there are multiple binary columns, let the user choose
+            updateSelectInput(session, "userSelected_Status", choices = binary_col_names)
+          }
+        })
+          
+         
+          
+          # -----------------------------------
+          
+          # Reactive expression for network plot
+          # observe({
+            # req(userSelected_Status(), userSelected_key_feature())  # Ensure selections are made
+            Final.DAG_network_plot_v6 <- Final.DAG_network_plot_v6 (augmented_edge_list,
+                                                                    possible_seed_arcs_filter,
+                                                                    data(), discretized_data,
+                                                                    final_white_list(),
+                                                                    Black_List(),
+                                                                    input$nboot, cl,
+                                                                    corrcoef,
+                                                                    input$userSelected_Status,
+                                                                    input$userSelected_key_feature)
+            
+          # })
+          # -----------------------------------
+         
+          Alg.Count_arcs.strength.table <- Final.DAG_network_plot_v6$Alg.Count_arcs.strength.table
+          
+          plots_list <- Final.DAG_network_plot_v6$plots_list
+          # plots_list(Final.DAG_network_plot_v6$plots_list)
+          # DAG.Plot <- Final.DAG_network_plot_v6$DAG.Plot
 
           output$DAG.Plot <- renderPlot({
-            # Final.DAG_network_plot_v5$DAG.Plot
-            Final.DAG_network_plot_v5$plotFunction()
+            # Final.DAG_network_plot_v6$DAG.Plot
+            Final.DAG_network_plot_v6$plotFunction()
           })
-          # -----------------------------------Not Generalized  version
-          observe({
-            # updateSelectInput(session, "selectedCellType", choices = setdiff(names(data()), c("CCN4", "Cancer")))
-            updateSelectInput(session, "selectedCellType", choices = setdiff(names(data()), names(data())[1:2]))
-
-          })
-          # -----------------------------------Not Generalized  version
-          output$contour_plot <- renderPlot({
-            selectedCellType <- input$selectedCellType
-            plots_list[[selectedCellType]]
-          })
-          # -----------------
-          arcs <- Final.DAG_network_plot_v5$arcs.BRCA
-          P_strength <- Final.DAG_network_plot_v5$P_strength
           
-          arc_slopes.strength <- Final.DAG_network_plot_v5$arc_slopes.strength
+   
+          # -----------------------------------Not Generalized  version
+          # output$contour_plot <- renderPlot({
+          #   # selectedCellType <- selectedCellType()
+            
+          #   selectedCellType <- input$selectedCellType
+          #   print("IM IN 1111")
+          #   print(plots_list)
+          #   print("selected")
+          #   print(selectedCellType)
+          #   plots_list[[selectedCellType]]
+          # })
+          
+       
+
+          # -----------------
+          arcs <- Final.DAG_network_plot_v6$arcs.BRCA
+          P_strength <- Final.DAG_network_plot_v6$P_strength
+          
+          arc_slopes.strength <- Final.DAG_network_plot_v6$arc_slopes.strength
           
           output$Diagnostic_plot <- renderPlot({
             Diagnostic_plot.v3(num.white_thresh, num_arcs.All.thresh, Total.BIC.thresh, threshold)
@@ -1907,14 +2036,14 @@ server <- function(input, output, session) {
 
           # DAG Network Plot
           output$DAGNetworkPlot <- renderVisNetwork({
-            network <- Final.DAG_network_plot_v5$network
+            network <- Final.DAG_network_plot_v6$network
           })
           
-          # arc_slopes_strength <- Final.DAG_network_plot_v5$arc_slopes.strength
-          final_DAG_detail <- Final.DAG_network_plot_v5$final_DAG_detail
+          # arc_slopes_strength <- Final.DAG_network_plot_v6$arc_slopes.strength
+          final_DAG_detail <- Final.DAG_network_plot_v6$final_DAG_detail
           
           output$arc_slopes_strength <- renderStyledTable(final_DAG_detail, rownames = TRUE, download_version = c('csv', 'excel'))
-        })
+        # })
         # --------------------------------------
         # Function to convert cycle to list of arcs using original vertex names
         cycle_to_arcs <- function(cycle, graph) {
@@ -2019,21 +2148,84 @@ server <- function(input, output, session) {
       footer = NULL
     ))
   })
-  # -------------------------------
+  # ------------------------------- 
   observe({
-    req(data())
-    updateSelectInput(session, "selectedCellType", choices = setdiff(names(data()), names(data())[1:2]))
-    # updateSelectInput(session, "selectedCellType", choices = setdiff(names(data()), c(names(data())[2], names(data())[1])))
-  })
+  req(data())
+  # Detect binary columns
+  binary_cols <- sapply(data(), function(x) all(x %in% c(0, 1)))
+  binary_col_names <- names(binary_cols[binary_cols])
+  print("im in 3")
+  print(binary_col_names)
+  print(length(binary_col_names))
+
+  if (length(binary_col_names) == 1) {
+    # If there's exactly one binary column, use it as Status
+    updateSelectInput(session, "userSelected_Status", choices = binary_col_names, selected = binary_col_names[1])
+  } else {
+    # If there are multiple binary columns, let the user choose
+    updateSelectInput(session, "userSelected_Status", choices = binary_col_names)
+  }
+
+  valid_features <- setdiff(names(data()), input$userSelected_Status)
+  
+  # Preserve current selection if still valid after update
+  current_key_feature <- input$userSelected_key_feature
+  if (!current_key_feature %in% valid_features && length(valid_features) > 0) {
+    current_key_feature <- valid_features[1]
+  }
+  updateSelectInput(session, "userSelected_key_feature", choices = valid_features, selected = current_key_feature)
+  
+  valid_secondary_features <- setdiff(names(data()), c(input$userSelected_Status, current_key_feature))
+  
+  # Preserve current secondary selection if still valid after update
+  current_secondary_selection <- input$selectedCellType
+  if (!current_secondary_selection %in% valid_secondary_features && length(valid_secondary_features) > 0) {
+    current_secondary_selection <- valid_secondary_features[1]
+  }
+  updateSelectInput(session, "selectedCellType", choices = valid_secondary_features, selected = current_secondary_selection)
+})
+
   
   plots_list = reactiveVal(NULL)
   
   output$contour_plot <- renderPlot({
-    req(input$selectedCellType)
-    req(!is.null(plots_list()))
-    selectedCellType <- input$selectedCellType
-    plots_list()[[selectedCellType]]
-  })
+  # Ensure the user has selected a key feature and plots_list is not null
+  req(input$selectedCellType, !is.null(plots_list()))
+
+  # Access the user-selected key feature
+  selectedCellType <- input$selectedCellType
+
+  # Debug: Print the selected key feature
+  cat("Selected Cell type:", selectedCellType, "\n")
+
+  print("plotslist")
+  print( names(plots_list()))
+
+  # Debug: Check if the key feature exists in plots_list
+  if(selectedCellType %in% names(plots_list())) {
+    cat("selected cell type found in plots_list\n")
+  } else {
+    cat("selected cell type NOT found in plots_list\n")
+  }
+
+  # Assuming plots_list contains ggplot objects or similar
+  # Render the plot corresponding to the selected key feature
+  plot_to_render <- plots_list()[[selectedCellType]]
+  if(!is.null(plot_to_render)) {
+    print(plot_to_render)
+  } else {
+    cat("Plot for selected key feature is NULL\n")
+  }
+
+  shinyalert::shinyalert(
+    title = "Process Completed",
+    text = "The analysis based on your selections has been completed successfully.",
+    type = "success"
+  )
+})
+
+
+
   # -------------------------------
   observeEvent(input$close, {
     # Close modal if "Acknowledge" clicked

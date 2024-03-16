@@ -1,13 +1,6 @@
+library(bnlearn)
+
 # ------------------------------------------------------------
-# Final.DAG_network_plot_v5 <- function(augmented_edge_list, 
-#                                       possible_seed_arcs_filter, 
-#                                       data, 
-#                                       discretized_data, 
-#                                       possible.white.list, 
-#                                       Black_List, 
-#                                       nboot, cl, 
-#                                       corrcoef) {
-  
 Final.DAG_network_plot_v6 <- function(augmented_edge_list,
                                       possible_seed_arcs_filter,
                                       data, discretized_data,
@@ -17,28 +10,71 @@ Final.DAG_network_plot_v6 <- function(augmented_edge_list,
                                       corrcoef,
                                       Status,
                                       userSelected_key_feature) {
-  
-  
+
+
+print("Starting Final.DAG_network_plot_v6 with inputs:")
+print(list(
+  Status = Status,
+  userSelected_key_feature = userSelected_key_feature,
+  nboot = nboot
+  # Add other inputs as needed
+))
+
+print("hi im status ")
+print(Status)
+print("and im other")
+print(userSelected_key_feature)
+print("WHITE LIST")
+print(possible.white.list)
 
 possible.white.list <- as.data.frame(possible.white.list)
 discretized_data <- as.data.frame(discretized_data)
 Black_List <- as.data.frame(Black_List)
 
-# --------------------------------check cycle in white list and remove it and also omit common arcs in black and whitelist from the whitelist
-# has_cycles <- function(df_arcs) {
-#   g <- graph_from_data_frame(d = df_arcs, directed = TRUE)
-#   return(girth(g)$girth > 0)
-# }
-# while(has_cycles(possible.white.list)) {
-#   # Here, just remove the last arc as an example, butcan implement a more sophisticated approach
-#   possible.white.list <- possible.white.list[-nrow(possible.white.list),]
-# }
-# --------------------------------
-# Check for common arcs and remove them from whitelist
-common_arcs <- intersect(possible.white.list, Black_List)
-if(length(common_arcs) > 0) {
-  possible.white.list <- setdiff(possible.white.list, common_arcs)
+print("After discretized_data processing:")
+print(head(discretized_data))
+
+# Check the structure and content of possible.white.list and Black_List
+print("Structure and content of possible.white.list:")
+print(str(possible.white.list))
+print(head(possible.white.list))
+
+print("Structure and content of Black_List:")
+print(str(Black_List))
+print(head(Black_List))
+
+print("Dimensions of possible.white.list:")
+print(dim(possible.white.list))
+
+print("Dimensions of Black_List:")
+print(dim(Black_List))
+print("nrow")
+print(nrow(possible.white.list))
+print("condi2")
+print(names(possible.white.list))
+
+if (nrow(possible.white.list) > 0) {
+print("i made it here 2")
+
+  # Safe to proceed with operations on possible.white.list
+
+# Check if possible.white.list is empty
+if (ncol(possible.white.list) == 0) {
+  # Handle the empty case - for example, by skipping the intersection operation
+  # Or initialize possible.white.list to match the structure of Black_List but with no rows
+  possible.white.list <- data.frame(from=character(), to=character())
+} else{
+  # Now, proceed with the intersection (or any other operation) as intended
+  # common_arcs <- intersect(possible.white.list, Black_List)
+
+  # Check for common arcs and remove them from whitelist
+  common_arcs <- intersect(possible.white.list, Black_List)
+  if(length(common_arcs) > 0) {
+    possible.white.list <- setdiff(possible.white.list, common_arcs)
+  }
 }
+print("i made it here 4")
+
 # ---------------
 arstr <- boot.strength(discretized_data, R = nboot, algorithm = "mmhc", cluster = cl, algorithm.args = list(whitelist = possible.white.list, blacklist = Black_List))
 ave.BRCA <- averaged.network(arstr)
@@ -49,6 +85,7 @@ arcs.BRCA <- as.data.frame(arcs.BRCA)
 
 fBRCABN <- bn.fit(ave.BRCA, data = discretized_data)
 
+
 # ----------------
 BRCA_str = arc.strength(ave.BRCA, data = discretized_data)
 weight.strength <- BRCA_str$strength
@@ -56,6 +93,8 @@ weight.strength <- BRCA_str$strength
 
 # ----------------------------------
 arc_slopes <- data.frame(from = character(), to = character(), slope = numeric())
+
+print("i made it here 5")
 
 # iterate over all nodes in the network
 for(node in nodes(fBRCABN)) {
@@ -137,82 +176,131 @@ network <- visNetwork(nodes, edges, width = "100%") %>%
                                      springLength = 100,  # Adjust as needed
                                      springConstant = 0.18))  # Adjust as needed 
 
+
+print("Network object created:")
+print(summary(network))  # or simply print(network) if that's more informative
+
+# -----
+performCpdistWithChecks <- function(bnModel, data, statusColumnName, keyFeature, cellType) {
+  print("IM IN HEREEEEEE")
+  if(!inherits(bnModel, "bn.fit")) {
+    print("bnModel should be a bn.fit object.")
+    return(NULL)
+  }
+  if(!is.data.frame(data)) {
+    print("data should be a data frame.")
+    return(NULL)
+  }
+  if(!(statusColumnName %in% names(data))) {
+    print(paste("Status column", statusColumnName, "not found in data columns."))
+    return(NULL)
+  }
+  if(!(keyFeature %in% names(data))) {
+    print(paste("keyFeature", keyFeature, "not found in data columns."))
+    return(NULL)
+  }
+  if(!(cellType %in% names(data))) {
+    print(paste("cellType", cellType, "not found in data columns."))
+    return(NULL)
+  }
+
+  # Assuming binary 1/0 represents high/low respectively
+  # Map your actual data accordingly if it uses different representations
+  evidence_high <- list(statusColumnName = "1")  # Replace "1" with actual high representation if different
+  evidence_low <- list(statusColumnName = "0")   # Replace "0" with actual low representation if different
+
+  # Now perform cpdist with these evidence lists
+  tryCatch({
+    cpDistResultsHigh <- cpdist(bnModel, nodes = c(keyFeature, cellType), evidence = evidence_high, n = 1e4)
+    print("cpdist executed successfully for high status.")
+  }, error = function(e) {
+    print(paste("ERROR in cpdist for high status:", conditionMessage(e)))
+  })
+
+  tryCatch({
+    cpDistResultsLow <- cpdist(bnModel, nodes = c(keyFeature, cellType), evidence = evidence_low, n = 1e4)
+    print("cpdist executed successfully for low status.")
+  }, error = function(e) {
+    print(paste("ERROR in cpdist for low status:", conditionMessage(e)))
+  })
+}
+
 # ----------------------------------- final legend line  Cantour Plot 
-# generatePlot <- function(cellType, fBRCABN, data) {
-generatePlot <- function(Status, userSelected_key_feature, cellType, fBRCABN, data) {
+generatePlot <- function(status, key_feature, cellType, fBRCABN, data) {
 
-  # Status <- names(data)[1] #  column name variable 'Status' with binary 0, 1 value
-  # Status <- names(data)== Status
-  # Status <- Status
-  
-  
-  # key_feature <- names(data)[2] # the column of data that is selected as ""key_feature"" by user
-  # key_feature <- names(data)== userSelected_key_feature
-  key_feature <- userSelected_key_feature
-  
-  
-  
-  # Validate inputs
-  if(!is.character(cellType) || length(cellType) != 1) stop("cellType should be a single character value.")
-  if(!inherits(fBRCABN, "bn.fit")) stop("fBRCABN should be a bn.fit object.")
-  
-  if(!is.data.frame(data) || !all(c(key_feature, cellType, Status) %in% names(data))) stop("Invalid data frame.")
-  # if(!is.data.frame(data) || !all(c("B", cellType, "A") %in% names(data))) stop("Invalid data frame.")
+    # Validate inputs
+    if(!is.character(cellType) || length(cellType) != 1)
+      stop("cellType should be a single character value.")
 
-  # # Define evidence as a list
-  # evidenceHigh <- (A > 0.95)
-  # evidenceLow <- (A <0.05)
+    if(!inherits(fBRCABN, "bn.fit"))
+      stop("fBRCABN should be a bn.fit object.")
+    
+    if(!is.data.frame(data) || !all(c(key_feature, cellType, status) %in% names(data))){
+      stop("Invalid data frame.")
+    }
 
-  # Perform conditional probability distributions
-  # https://www.polished.tech/docs/02-custom-branding
-  
-  # data[[A]] <0.05
-  
-  
-  # sim1 <- tryCatch(cpdist(fBRCABN, nodes = c(key_feature, cellType), n = 10^5, evidence = (eval(parse(text = paste(names(data)[1], ">= 0.95"))))), error = function(e) NULL) # evidence = (as.name(Status) > 0.95)
-  # sim1 <- tryCatch(cpdist(fBRCABN, nodes = c(key_feature, cellType), n = 10^5, evidence = (eval(parse(text = paste(names(data)[1], "== 'A'"))> 0.95))), error = function(e) NULL) # evidence = (as.name(Status) > 0.95)
-  # sim1 <- tryCatch(cpdist(fBRCABN, nodes = c(key_feature, cellType), n = 10^5, evidence = (A > 0.95)), error = function(e) NULL) # evidence = (as.name(Status) > 0.95)
-  # sim1 <- tryCatch(cpdist(fBRCABN, nodes = c(key_feature, cellType), n = 10^5, evidence = (as.name(Status) > 0.95)), error = function(e) NULL) 
-  sim1 <- tryCatch(cpdist(fBRCABN, nodes = c(key_feature, cellType), n = 10^5, evidence = (Status > 0.95)), error = function(e) NULL)
-  # sim1 <- tryCatch(cpdist(fBRCABN, nodes = c(key_feature, cellType), n = 10^5, evidence = (A > 0.95)), error = function(e) NULL)
-  
-  
 
-  # sim2 <- tryCatch(cpdist(fBRCABN, nodes = c(key_feature, cellType), n = 10^6, evidence = (eval(parse(text = paste(names(data)[1], "<= 0.05"))))), error = function(e) NULL) #evidence = (as.name(Status) < 0.05)
-  # sim2 <- tryCatch(cpdist(fBRCABN, nodes = c(key_feature, cellType), n = 10^6, evidence = (eval(parse(text = paste(names(data)[1], "== 'A'"))< 0.05))), error = function(e) NULL) #evidence = (as.name(Status) < 0.05)
-  # sim2 <- tryCatch(cpdist(fBRCABN, nodes = c(key_feature, cellType), n = 10^6, evidence = (A <0.05)), error = function(e) NULL) #evidence = (as.name(Status) < 0.05)
-  # sim2 <- tryCatch(cpdist(fBRCABN, nodes = c(key_feature, cellType), n = 10^6, evidence = (as.name(Status) < 0.05)), error = function(e) NULL) #evidence = (as.name(Status) < 0.05)
-  sim2 <- tryCatch(cpdist(fBRCABN, nodes = c(key_feature, cellType), n = 10^6, evidence = (Status < 0.05)), error = function(e) NULL) #evidence = (as.name(Status) < 0.05)
-  # sim2 <- tryCatch(cpdist(fBRCABN, nodes = c(key_feature, cellType), n = 10^6, evidence = (A <0.05)), error = function(e) NULL)
-  
-  
 
-  if(is.null(sim1) || is.null(sim2)) stop("Error in performing cpdist with given evidence.")
+# Prepare evidence directly from the binary values in the specified 'Status' column
+  # Here, we assume the BN model expects evidence in the form of character values "1" or "0"
+  #rint("ia m the key feature")
+  #print(key_feature)
+  #browser()
+  print("Defining evidence_high and evidence_low")
+  #evidence_high <<- (status >= 0.95)
+  #evidence_low <<- (status <= 0.05)
+  #print(evidence_high)
+  #print(evidence_low)
+  #print(ls())
 
-  # Prepare data for plotting
-  prepareSimData <- function(sim, node) data.frame(x = sim[[key_feature]], y = sim[[node]])
-  # prepareSimData <- function(sim, node) data.frame(x = sim$B, y = sim[[node]])
-  
-  simData.tumor <- prepareSimData(sim1, cellType)
-  simData.normal <- prepareSimData(sim2, cellType)
 
-  # Perform linear regression and normalize data
-  normalize <- function(var, condition) (var[condition] - min(var)) / (max(var) - min(var))
+#print(bnlearn::nodes(fBRCABN))
+#print(bnlearn::nodeStates(fBRCABN))
+print("hi im status")
+print(status)
+# Example cpdist call adjusted
+sim1 <- tryCatch(cpdist(fBRCABN, nodes = c(userSelected_key_feature, cellType), n = 10^5, evidence =  setNames(list(1), status), method="lw"), error = function(e) {print(e$message)})
+sim2 <- tryCatch(cpdist(fBRCABN, nodes = c(userSelected_key_feature, cellType), n = 10^6, evidence = setNames(list(0), status), method = "lw"), error = function(e) {print(e$message)})
+ 
+
+# sim1 <- tryCatch(
+#   cpdist(fBRCABN, nodes = c(key_feature, cellType), n = 10^5, evidence = evidence_high),
+#   error = function(e) {
+#     message("Error in sim1: ", e$message)
+#     NULL  # Return NULL on error to make it clear where the failure occurred
+#   }
+# )
+
+# sim2 <- tryCatch(cpdist(fBRCABN, nodes = c(key_feature, cellType), n = 10^6, evidence = evidence_low), error = function(e) print(e))
+
+
+
+
+
+print("made it here")
+ # sim2 <- cpdist(fBRCABN, nodes = c(key_feature, cellType), n = 10^6, evidence =  A < 0.05, debug = TRUE)
+#print("SIM 2")
+#print(sim2)
+    #sim1 <- cpdist(fBRCABN, nodes = c(key_feature, cellType), n = 10^5, evidence = list(StatusDiscretized = "high") )
+    #sim2 <- cpdist(fBRCABN, nodes = c(key_feature, cellType), n = 10^6, evidence = list(StatusDiscretized = "low") )
+
+    if(is.null(sim1) || is.null(sim2)) stop("Error in performing cpdist with given evidence.")
+
+    # Prepare data for plotting
+    prepareSimData <- function(sim, node) data.frame(x = sim[[key_feature]], y = sim[[node]])
+    
+    simData.tumor <- prepareSimData(sim1, cellType)
+    simData.normal <- prepareSimData(sim2, cellType)
+
+    # Perform linear regression and normalize data
+    normalize <- function(var, condition) {
+      (var[condition] - min(var)) / (max(var) - min(var))
+    }
   
-  xa <- normalize(data[[key_feature]], data[[Status]] == 1)
-  # xa <- normalize(data$B, data$A == 1)
-  
-  ya <- normalize(data[[cellType]], data[[Status]] == 1)
-  # ya <- normalize(data[[cellType]], data$A == 1)
-  
-  
-  xb <- normalize(data[[key_feature]], data[[Status]] == 0)
-  # xb <- normalize(data$B, data$A == 0)
-  
-  
-  yb <- normalize(data[[cellType]], data[[Status]] == 0)
-  # yb <- normalize(data[[cellType]], data$A == 0)
-  
+  xa <- normalize(data[[key_feature]], data[[status]] == 1)
+  ya <- normalize(data[[cellType]], data[[status]] == 1)
+  xb <- normalize(data[[key_feature]], data[[status]] == 0)
+  yb <- normalize(data[[cellType]], data[[status]] == 0)
 
   Data.tumor <- data.frame(x = xa, y = ya)
   Data.normal <- data.frame(x = xb, y = yb)
@@ -235,10 +323,9 @@ generatePlot <- function(Status, userSelected_key_feature, cellType, fBRCABN, da
   simData.normal$type <- "Normal"
   simData.combined <- rbind(simData.tumor, simData.normal)
   
-  # ----------
   # Construct the Plot
   p <- ggplot() +
-    geom_density_2d(data = simData.combined, aes(x = x, y = y, color = type)) +
+   geom_density_2d(data = simData.combined, aes(x = x, y = y, color = type)) +
     geom_point(data = Data.combined, aes(x = x, y = y, color = type), alpha = 0.5, shape = 19, size = 2) +
     geom_abline(aes(slope = cancer_slope, intercept = coef(lm(y ~ x, data = simData.tumor))[1]), color = "red", lty = "solid", lwd = 1.05) +
     geom_abline(aes(slope = normal_slope, intercept = coef(lm(y ~ x, data = simData.normal))[1]), color = "blue", lty = "solid", lwd = 1.05) +
@@ -257,6 +344,7 @@ generatePlot <- function(Status, userSelected_key_feature, cellType, fBRCABN, da
   # Return the plot
   return(p)
 }
+
 # --------------------------------------------------------
 
 # Status <- names(data)[1] # A: " Binary variable column name variable 'Status' with binary 0, 1 value
@@ -438,7 +526,13 @@ temp2$Excluded[temp2$Unclear.direction == "1"] <- ""
 rownames(temp2) <- NULL 
 Alg.Count_arcs.strength.table <- temp2
 
-
+# Before returning from the function
+print("Function return objects:")
+print(list(
+  network = network,
+  final_DAG_detail = final_DAG_detail
+  # Include other objects you find relevant
+))
 
 return(list(Alg.Count_arcs.strength.table = Alg.Count_arcs.strength.table, 
             network = network,
@@ -454,4 +548,5 @@ return(list(Alg.Count_arcs.strength.table = Alg.Count_arcs.strength.table,
             }
             ))
 
+}
 }

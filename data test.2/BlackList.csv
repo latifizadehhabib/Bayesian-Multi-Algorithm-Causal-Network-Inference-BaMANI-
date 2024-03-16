@@ -1,0 +1,10 @@
+from,to
+AA,BB
+BB,CC
+CC,DD
+DD,EE
+EE,AA
+EE,FF
+FF,GG
+GG,HH
+HH,AA

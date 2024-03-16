@@ -17,7 +17,7 @@ shinyApp(
     })
     
     output$table <- renderDataTable({
-      data <-  data %>% filter(cyl %in% input$select1) %>% filter(gear %in% input$checkbox)
+      data <-  data %>% stats::filter(cyl %in% input$select1) %>% stats::filter(gear %in% input$checkbox)
       datatable(data)
     })
     

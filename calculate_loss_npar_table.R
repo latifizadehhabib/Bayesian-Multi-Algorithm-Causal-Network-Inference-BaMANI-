@@ -1,4 +1,6 @@
 calculate_loss_npar_table <- function(threshold, temp_list_merge, discretized_data, nboot, cl, Black_List) {
+  
+  print("IM IN THE FUNCTION: ")
   npar_list <- list()
   L1_list <- list()
   parents_list = list()
@@ -26,19 +28,37 @@ calculate_loss_npar_table <- function(threshold, temp_list_merge, discretized_da
 
     temp_white_thresh <- as.data.frame(temp_list_merge[[i+1]], row.names = NULL)
   
+  print("hi there")
+  print(temp_white_thresh)
     
     # --------------------------
     has_cycles <- function(df_arcs) {
-      g <- graph_from_data_frame(d = df_arcs, directed = TRUE)
-      return(girth(g)$girth > 0)
-    }
-    
-    
-    
-    while(has_cycles(temp_white_thresh)) {
-      # Here, just remove the last arc as an example, but you can implement a more sophisticated approach
-      temp_white_thresh <- temp_white_thresh[-nrow(temp_white_thresh),]
-    }
+  g <- graph_from_data_frame(d = df_arcs, directed = TRUE)
+  girth_value <- girth(g)$girth
+  print(paste("Girth value:", girth_value))
+  return(girth_value > 0)
+}
+
+
+if(has_cycles(temp_white_thresh) ) {
+  print("INSIDE LOOP")
+  print("Removing last arc to break cycle")
+  
+  # Print temp_white_thresh before removing the last row
+  print("Before removing last row:")
+  print(temp_white_thresh)
+  
+  # Remove the last row
+  temp_white_thresh <- temp_white_thresh[-nrow(temp_white_thresh), ]
+  
+  # Print temp_white_thresh after removing the last row
+  print("After removing last row:")
+  print(temp_white_thresh)
+
+}
+
+print("Exited loop")
+
     
     
     # ---------------
