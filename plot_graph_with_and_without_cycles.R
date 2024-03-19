@@ -35,7 +35,7 @@ plot_graph_with_and_without_cycles <- function(possible.white.list) {
   plot_graph_from_table(g.final, "Final White list after Cycle check", "lightcoral", shared_layout)
   plot_after <- recordPlot()
   
-  final_white_list <- get.data.frame(g.final, what='edges')
+  final_white_list <- as.data.frame(g.final, what='edges')
   final_white_list <- as.data.frame(final_white_list)
   row.names(final_white_list) <- NULL
   

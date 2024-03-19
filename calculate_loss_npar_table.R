@@ -1,4 +1,7 @@
+library(igraph)
+
 calculate_loss_npar_table <- function(threshold, temp_list_merge, discretized_data, nboot, cl, Black_List) {
+  
   
   print("IM IN THE FUNCTION: ")
   npar_list <- list()
@@ -17,7 +20,30 @@ calculate_loss_npar_table <- function(threshold, temp_list_merge, discretized_da
   
   parents_list_name <- c()
   
+  #------------------------------------------------
+# Function to detect and break cycles in a graph represented by a data frame of edges
+break_cycles_in_df_edges <- function(df_edges) {
+  g <- graph_from_data_frame(df_edges, directed = TRUE)
   
+  # Check for cycles using the girth function
+  # A girth of 0 indicates an acyclic graph
+  while(girth(g)$girth != 0) {
+    # Since igraph doesn't provide a direct way to identify the specific cycle,
+    # you might need a heuristic or method to decide which edge to remove.
+    # For demonstration, let's remove a random edge from the graph.
+    # In practice, you might want to remove edges based on specific criteria.
+    
+    edges <- E(g)
+    if(length(edges) > 0) {
+      g <- delete_edges(g, sample(edges, 1))
+    } else {
+      break # Exit if there are no edges left to remove
+    }
+  }
+  
+  # Return the modified graph as an edge data frame
+  return(get.data.frame(g, what="edges"))
+}
   
   #-------------------------------------------- new
   for (i in 1: length(threshold)) {
@@ -28,62 +54,97 @@ calculate_loss_npar_table <- function(threshold, temp_list_merge, discretized_da
 
     temp_white_thresh <- as.data.frame(temp_list_merge[[i+1]], row.names = NULL)
   
+      # Inserted cycle detection and breaking logic here
+    temp_white_thresh <- break_cycles_in_df_edges(temp_white_thresh)
+
   print("hi there")
   print(temp_white_thresh)
     
     # --------------------------
-    has_cycles <- function(df_arcs) {
-  g <- graph_from_data_frame(d = df_arcs, directed = TRUE)
-  girth_value <- girth(g)$girth
-  print(paste("Girth value:", girth_value))
-  return(girth_value > 0)
-}
+#     has_cycles <- function(df_arcs) {
+#   g <- graph_from_data_frame(d = df_arcs, directed = TRUE)
+#   girth_value <- girth(g)$girth
+#   print(paste("Girth value:", girth_value))
+#   return(girth_value > 0)
+# }
 
 
-if(has_cycles(temp_white_thresh) ) {
-  print("INSIDE LOOP")
-  print("Removing last arc to break cycle")
+# if(has_cycles(temp_white_thresh) ) {
+#   print("INSIDE LOOP")
+#   print("Removing last arc to break cycle")
   
-  # Print temp_white_thresh before removing the last row
-  print("Before removing last row:")
-  print(temp_white_thresh)
+#   # Print temp_white_thresh before removing the last row
+#   print("Before removing last row:")
+#   print(temp_white_thresh)
   
-  # Remove the last row
-  temp_white_thresh <- temp_white_thresh[-nrow(temp_white_thresh), ]
+#   # Remove the last row
+#   temp_white_thresh <- temp_white_thresh[-nrow(temp_white_thresh), ]
   
-  # Print temp_white_thresh after removing the last row
-  print("After removing last row:")
-  print(temp_white_thresh)
+#   # Print temp_white_thresh after removing the last row
+#   print("After removing last row:")
+#   print(temp_white_thresh)
 
-}
-
-print("Exited loop")
-
+# }
+# print("done with if statement")
+ 
     
     
     # ---------------
-    # Check for common arcs and remove them from whitelist
-    common_arcs <- intersect(temp_white_thresh, Black_List)
-    if(length(common_arcs) > 0) {
-      temp_white_thresh <- setdiff(temp_white_thresh, common_arcs)
+    # # Check for common arcs and remove them from whitelist
+    # common_arcs <- intersect(temp_white_thresh, Black_List)
+    # if(length(common_arcs) > 0) {
+    #   temp_white_thresh <- setdiff(temp_white_thresh, common_arcs)
+    # }
+
+     # Remove common arcs with blacklist
+    if (!is.null(Black_List) && nrow(Black_List) > 0 && nrow(temp_white_thresh) > 0) {
+      common_arcs <- intersect(temp_white_thresh, Black_List)
+      if(length(common_arcs) > 0) {
+        temp_white_thresh <- setdiff(temp_white_thresh, common_arcs)
+      }
     }
     # ---------------
     
+print("alo 1")
     
     #-------------------------------------------- new 1
     
     if ((!is.null(temp_white_thresh) && nrow(temp_white_thresh)> 0) &
         (!is.null(Black_List) && nrow(Black_List)> 0)) {
+
       arstr <- boot.strength(discretized_data, R = nboot, algorithm = "mmhc", cluster = cl,
                              algorithm.args = list(whitelist = temp_white_thresh, blacklist = Black_List))
+      print("block 1")
     } else if ((!is.null(temp_white_thresh) && nrow(temp_white_thresh)> 0)) {
       arstr <- boot.strength(discretized_data, R = nboot, algorithm = "mmhc", cluster = cl,
                              algorithm.args = list(whitelist = temp_white_thresh))
+      print("block 2")
+        
     } else if((!is.null(Black_List) && nrow(Black_List)> 0)) {
       arstr <- boot.strength(discretized_data, R = nboot, algorithm = "mmhc", cluster = cl,
                              algorithm.args = list(blacklist = Black_List))
+      print("block 3")
+
     }
     
+print("alo 2")
+
+
+# # Perform boot.strength with appropriate whitelists and blacklists
+#     tryCatch({
+#       if (!is.null(temp_white_thresh) && nrow(temp_white_thresh) > 0) {
+#         arstr <- boot.strength(discretized_data, R = nboot, algorithm = "mmhc", cluster = cl,
+#                                algorithm.args = list(whitelist = temp_white_thresh, blacklist = Black_List))
+#       } else {
+#         arstr <- boot.strength(discretized_data, R = nboot, algorithm = "mmhc", cluster = cl,
+#                                algorithm.args = list(blacklist = Black_List))
+#       }
+#       print("alo2")
+#     }, error = function(e) {
+#       print(paste("Error in boot.strength for threshold", threshold[i], ":", e$message))
+#       next  # Skip to the next iteration of the loop
+#     })
+
     #-------------------------------------------- new 2
     # if ((!is.null(temp_white_thresh) || length(temp_white_thresh) != 0) &
     #     (!is.null(Black_List) || length(Black_List) != 0)) {
@@ -123,6 +184,8 @@ print("Exited loop")
     num_arcs.All.thresh <- cbind(num_arcs.All.thresh, num_arcs.thresh)
     # --------------
     
+print("alo 3")
+
     fBRCABN <- bn.fit(ave.BRCA, data = discretized_data)
     
     nodes = nodes(fBRCABN)
@@ -161,6 +224,8 @@ print("Exited loop")
     L1_list[[i]] <- data.frame(node = names(L1_BN), L1 = L1_BN)
     rownames(L1_list[[i]]) <- NULL
     colnames(L1_list[[i]])[2] <- L1_name
+print("alo 4")
+
   }
   
   npar_table <- Reduce(function(x, y) merge(x, y, by = "node", all = TRUE), npar_list)
@@ -231,6 +296,8 @@ print("Exited loop")
   # return(list(npar_merged = npar_merged, L1_merged = L1_merged,
   #             parents_list_merged = parents_list_merged, 
   #             num_arcs.All.thresh = num_arcs.All.thresh))
+print("alo finale")
+
   # -------------------
   return(list(npar_merged = npar_merged, L1_merged = L1_merged,
               parents_list_merged = parents_list_merged,
