@@ -14,12 +14,17 @@ Customizable Filtering: Enables users to filter potential arcs based on strength
 -------------------------------------------------
 For the local machine: Run the "app.R" code
 -------------------------------------------------
+### Note for Users Facing Issues with Python Libraries
+
+If you are trying to run the code and it's still facing an issue running it even though you installed pandas and dagma libraries, you need to follow these steps:
+
 “Please note that I added this commented line on run_algorithm_directed.R.
 
-Open "run_algorithm_directed.R" file
-Uncomment this line
-Change the path to where python.exe is located on your computer
-Restart R Studio and run”
+1. Open "run_algorithm_directed.R" file
+2. Uncomment this line
+3. Change the path to where python.exe is located on your computer
+4. Restart R Studio and run”
+"""
 -------------------------------------------------
 
 Installation
