@@ -14,6 +14,14 @@ Customizable Filtering: Enables users to filter potential arcs based on strength
 -------------------------------------------------
 For the local machine: Run the "app.R" code
 -------------------------------------------------
+“Please note that I added this commented line on run_algorithm_directed.R.
+
+Open "run_algorithm_directed.R" file
+Uncomment this line
+Change the path to where python.exe is located on your computer
+Restart R Studio and run”
+-------------------------------------------------
+
 Installation
 Clone the repository to your local machine:
 
