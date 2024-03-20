@@ -48,6 +48,9 @@ run_algorithm_directed <- function(algorithm_directed, Blank_edge_list, Edge_cou
       bootstrap_sample <- discretized_data[sample(nrow(discretized_data), replace = TRUE), ]
       
       library(reticulate)
+      
+      # REPLACE THE PATH TO PYTHON TO WHERE IT IS LOCATED ON YOUR COMPUTER
+      # use_python("C:/Users/AppData/Local/Programs/Python/python.exe", required = TRUE)
 
       # Convert R data frames to Python objects and assign them to Python variables
       py$bootstrap_sample_py <- r_to_py(bootstrap_sample)
