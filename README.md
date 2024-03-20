@@ -19,7 +19,7 @@ For the local machine: Run the "app.R" code
 If you are trying to run the code and it's still facing an issue running it even though you installed pandas and dagma libraries, you need to follow these steps:
     
 1. Open "run_algorithm_directed.R" file
-2. Uncomment this line   # use_python("C:/Users/GON/AppData/Local/Programs/Python/Python310/python.exe", required = TRUE)
+2. Uncomment this line   # use_python("C:/Users/AppData/Local/Programs/Python/python.exe", required = TRUE)
 4. Change the path to where python.exe is located on your computer
 5. Restart R Studio and run
 -------------------------------------------------
