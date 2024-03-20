@@ -23,17 +23,7 @@ If you are trying to run the code and it's still facing an issue running it even
 4. Change the path to where python.exe is located on your computer
 5. Restart R Studio and run
 -------------------------------------------------
-
-Installation
-Clone the repository to your local machine:
-
-git clone https://github.com/KlinkeLab/BaMANI.git
 -------------------------------------------------
-Navigate into the BaMANI directory:
-
-cd BaMANI
--------------------------------------------------
-
 Implementation: 
 -------------------------------------------------
 
