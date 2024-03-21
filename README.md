@@ -44,10 +44,10 @@ Choose from various structure learning algorithms and proceed with 'Run Discover
 </p>
 
 <p align="center">
-  <img src="images/file_upload.png" alt="Upload Data" width="300" height="300"/>
+  <img src="images/file_upload.png" alt="Upload Data" width="310" height="300"/>
 
   
-  <img src="images/choose_dir_alg.png" alt="Choose Directed Algorithms" width="350" height="300"/>
+  <img src="images/choose_dir_alg.png" alt="Choose Directed Algorithms" width="310" height="300"/>
 </p>
 
 Step 3: Filtering Potential Arcs
