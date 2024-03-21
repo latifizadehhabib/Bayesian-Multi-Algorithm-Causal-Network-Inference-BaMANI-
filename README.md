@@ -26,11 +26,6 @@ If you are trying to run the code and it's still facing an issue running it even
 -------------------------------------------------
 Implementation: 
 -------------------------------------------------
-
-<p align="center">
-<img src="images/login.png" alt="Login Page" title="Log in Page" width="600" height="300">
-</p>
-
 Step 1: Creating and Specifying a Blacklist
 Objective: Input a blacklist to outline prior knowledge and remove implausible arcs.
 Process: Specify nodes and arcs to be excluded based on domain knowledge.
