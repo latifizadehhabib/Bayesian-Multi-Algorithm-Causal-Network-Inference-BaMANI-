@@ -8,7 +8,7 @@ plot_Algorithm.Count_arcs.strength <- function(Alg.Count_arcs.strength.data) {
   data$category <- ifelse(data$Min.BIC_clear.direction == 1, "Min.BIC_clear.direction",
                         ifelse(data$Min.BIC.unclear.direction == 1, "Min.BIC.unclear.direction",
                                ifelse(data$Unclear.direction == 1, "Unclear.direction",
-                                      ifelse(data$Excluded == 1, "Excluded", NA_character_))))
+                                      ifelse(data$Excluded == 1, "Excluded", "Min.BIC.unclear.direction"))))
   
    arc_name <- as.numeric(data$Edge_No)
   algorithm_count <- as.numeric(data$Hit.Count)

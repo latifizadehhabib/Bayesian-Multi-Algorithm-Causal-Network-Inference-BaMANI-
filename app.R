@@ -148,7 +148,7 @@ ui <- dashboardPage(
       
       menuItem("Plots", icon = icon("chart-line"),
                menuSubItem("Diagnostic Plot", tabName = "diagnostic_plot"),
-               menuSubItem("Algorithm Count & Arcs Strength", tabName = "algorithm_count_arcs_strength"),
+               menuSubItem("Algorithm Count & Arc Strength", tabName = "algorithm_count_arcs_strength"),
                menuSubItem("DAG Network Plot", tabName = "DAG_network_plot"),
                menuSubItem("DAG Network flow", tabName = "DAG_Plot"),
                menuSubItem("Comparative Analysis", tabName = "contour_plot")
@@ -592,7 +592,7 @@ $(document).on('click', '#goToTab', function() {
       # ------------------------------------------------------------------------            
       tabItem(tabName = "augmented_thresh_cols",
               h3("Arcs and thier corresponding info in different algorithm"), 
-              tags$p("List of Arcs and thier corresponding arcs strength and thier inhibitive or promotive impact/ correlation sign in different algorithm", 
+              tags$p("List of Arcs and thier corresponding arc strength and thier inhibitive or promotive impact/ correlation sign in different algorithm", 
                      style = "font-family: 'Arial'; font-size: 14px; color: #333;"),
 
               tabsetPanel(id = "tabset11",
@@ -909,7 +909,7 @@ $(document).on('click', '#goToTab', function() {
                                     box(
                                       # title = "Select feature",
                                       width = 3,
-                                      selectInput("userSelected_Status", "Choose Status:", choices = NULL),
+                                      selectInput("userSelected_Status", "Choose Status Feature:", choices = NULL),
                                       selectInput("userSelected_key_feature", "Choose Key Feature:", choices = NULL),
                                       selectInput("selectedCellType", "Select a secondary feature:", choices = NULL),
                                       actionButton("updateButton", "Update", icon = icon("sync"), class = "btn-primary")
@@ -932,7 +932,7 @@ $(document).on('click', '#goToTab', function() {
       # ------------------------------------------------------------------------              
       
       tabItem(tabName = "algorithm_count_arcs_strength",
-              h3("Algorithm count and arcs strength of each arc"), 
+              h3("Algorithm count and arc strength"), 
               tags$p(HTML("Edges are organized based on the number of algorithms that identified that an edge was enriched (as depicted by the bar graph on the top) 
               and the strength of the enrichment (bottom). The <code>arc Strength</code>  representing the strength of enrichment, corresponds to the 
               likelihood of a partial correlation between the two nodes of an arc being attributable to random chance, given the remainder 
@@ -1166,7 +1166,13 @@ observeEvent(input$userSelected_Status, {
       size = "m" # Adjust the modal size if needed
     ))
   }
+
+  # --------------------------
+
 })
+
+
+#------------------------------
 
 
   # browser()
@@ -2086,6 +2092,9 @@ observeEvent(input$userSelected_Status, {
             )} else{
               plot_done(TRUE)
               cycles_resolved(FALSE)
+
+
+
             }
             
         })
@@ -2144,8 +2153,9 @@ observeEvent(input$userSelected_Status, {
             div(
               style = "text-align: left;", # attention: change center to left
               actionButton(inputId = "remove", 
-                           label = tags$span(icon("fas fa-hand-pointer", style="margin-right: 4px;"), "Remove selected edges"), # attention: added </strong>
-                           style = "background-color: #3498db; color: white; padding: 10px 20px; font-size: 14px; border-radius: 5px; cursor: pointer;")
+                           # label = tags$span(icon("fas fa-hand-pointer", style="margin-right: 4px;"), tags$strong("Remove selected edges")), # attention: added </strong>
+                           label = tags$strong(tags$span(icon("fas fa-hand-pointer", style="margin-right: 4px; color: red;")), "Remove selected edges"), # Wrapped in tags$strong
+                           style = "background-color: #3498db; color: white; padding: 10px 20px; font-size: 14px; border-radius: 5px; cursor: pointer; margin-left: 10px;")
             )
           } else {            # Else, don't render anything
             return(NULL)
@@ -2257,6 +2267,58 @@ observeEvent(input$userSelected_Status, {
 
               })
 
+          # Adding the other graphs after the cycles are resolved
+          print("I CAME TO 5")
+
+            Final.DAG_network_plot_v6 <- Final.DAG_network_plot_v6 (augmented_edge_list,
+                                                                    possible_seed_arcs_filter,
+                                                                    data(), discretized_data,
+                                                                    final_white_list(),
+                                                                    Black_List(),
+                                                                    input$nboot, cl,
+                                                                    corrcoef,
+                                                                    input$userSelected_Status,
+                                                                    input$userSelected_key_feature)
+            
+             plot_done(TRUE)
+
+            Alg.Count_arcs.strength.table <- Final.DAG_network_plot_v6$Alg.Count_arcs.strength.table
+            # plots_list <- Final.DAG_network_plot_v6$plots_list
+            plots_list(Final.DAG_network_plot_v6$plots_list)
+            
+            
+
+            output$DAG.Plot <- renderPlot({
+              # Final.DAG_network_plot_v6$DAG.Plot
+              Final.DAG_network_plot_v6$plotFunction()
+            })
+            
+            
+            # -----------------
+            
+            arcs <- Final.DAG_network_plot_v6$arcs.BRCA
+            P_strength <- Final.DAG_network_plot_v6$P_strength
+            
+            arc_slopes.strength <- Final.DAG_network_plot_v6$arc_slopes.strength
+            
+            output$Diagnostic_plot <- renderPlot({
+              Diagnostic_plot.v3(num.white_thresh, num_arcs.All.thresh, Total.BIC.thresh, threshold)
+            })
+            # --------------
+            output$Plot.Algorithm.Count_arcs.strength <- renderPlot({
+              plot_Algorithm.Count_arcs.strength(Alg.Count_arcs.strength.table)
+            })
+            # DAG Network Plot
+            output$DAGNetworkPlot <- renderVisNetwork({
+              network <- Final.DAG_network_plot_v6$network
+            })
+            # arc_slopes_strength <- Final.DAG_network_plot_v6$arc_slopes.strength
+            final_DAG_detail <- Final.DAG_network_plot_v6$final_DAG_detail
+            
+            output$arc_slopes_strength <- renderStyledTable(final_DAG_detail, rownames = TRUE, download_version = c('csv', 'excel'))
+
+          
+
           })
           # --------------------------------------
           
@@ -2303,7 +2365,7 @@ observeEvent(input$userSelected_Status, {
           observe({
             currentTab <- input$sidebarMenu
 
-            if( (update_clicked() || !contour_plot_initial()) && currentTab == "contour_plot"){
+            if( (update_clicked() || !contour_plot_initial()) && (currentTab == "contour_plot" )){
                 print("UPDATE IS CLICKED")
 
              if(hasBinaryColumns()){
@@ -2315,9 +2377,9 @@ observeEvent(input$userSelected_Status, {
                       tags$span(
                         style = "color: #2980b9;", 
                         icon("sync", style = "margin-right: 6px; color: #2980b9; animation: spin 2s linear infinite;"), 
-                        tags$span(style = "font-weight: bold;", "Generating Contour Plot: ")
+                        tags$span(style = "font-weight: bold;", "Generating  the contour Plot: ")
                       ),
-                      "Please wait, we're processing the comparative analysis.."
+                      "Please wait, we're generating the plot.."
                     )
                   ),
                   footer = NULL,  # No footer as requested
