@@ -17,7 +17,6 @@ For the local machine: Run the "app.R" code
 ### Note for Users Facing Issues with Python Libraries
 
 If you are trying to run the code and are having trouble even though you installed the pandas and dagma libraries, follow these steps. Before calling any Python-related commands, ensure that the correct virtual environment or Conda environment is activated with use_virtualenv() or use_condaenv().
-:
     
 1. Open "run_algorithm_directed.R" file
 2. Uncomment this line   # use_python("C:/Users/AppData/Local/Programs/Python/python.exe", required = TRUE)
