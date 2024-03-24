@@ -22,6 +22,8 @@ If you are trying to run the code and it's facing an issue running it even thoug
 2. Uncomment this line   # use_python("C:/Users/AppData/Local/Programs/Python/python.exe", required = TRUE)
 4. Change the path to where python.exe is located on your computer
 5. Restart R Studio and run
+
+#Before calling any Python-related commands, ensure that the correct virtual environment or Conda environment is activated with use_virtualenv() or use_condaenv().
 -------------------------------------------------
 -------------------------------------------------
 Implementation: 
