@@ -1,4 +1,11 @@
+# install.packages('rsconnect')
 rm(list = ls())        
+
+# if (!requireNamespace("BiocManager", quietly = TRUE))
+#   install.packages("BiocManager")
+# 
+# BiocManager::install("Rgraphviz")
+
 library(bnlearn)
 library(shiny)
 library(shinydashboard)
@@ -13,8 +20,6 @@ library(keyring)
 library(igraph)
 library(shinyalert) 
 library(shinyjs)
-
-
 library("purrr")
 library("parallel")
 library("DT")
@@ -24,7 +29,6 @@ library("colorspace")
 library("stats")
 library("bnlearn")
 library("lattice")
-library("Rgraphviz")
 library("MASS")
 library("ggpubr")
 library("snow")
@@ -67,21 +71,21 @@ styled_title <- function(text,
                  box-shadow: ', box_shadow, ';">', text, '</div>'))
 }
 # -----------
-load_required_packages <- function(packages) {
-  # Load each package in list
-  for (package in packages) {
-    library(package, character.only = TRUE)
-  }
-}
-# -----------
 # load_required_packages <- function(packages) {
+#   # Load each package in list
 #   for (package in packages) {
-#     if (!require(package, character.only = TRUE)) {
-#       install.packages(package)
-#       library(package, character.only = TRUE)
-#     }
+#     library(package, character.only = TRUE)
 #   }
 # }
+# -----------
+load_required_packages <- function(packages) {
+  for (package in packages) {
+    if (!require(package, character.only = TRUE)) {
+      install.packages(package)
+      library(package, character.only = TRUE)
+    }
+  }
+}
 # -----------
 load_source_files <- function(source_files) {
   for (source_file in source_files) {
@@ -710,64 +714,46 @@ $(document).on('click', '#goToTab', function() {
 
               tabsetPanel(id = "tabset81",
                           # First TabPanel
+                          # --------------------------------------------------
                           tabPanel(
-                            title = "WhiteList Check acyclicity",
+                            title = "WhiteList Check Acyclicity",
                             fluidRow(
                               column(
                                 12,
                                 box(
-                                  title = "WhiteList Check acyclicity",
+                                  title = "WhiteList Check Acyclicity",
                                   status = "primary",
                                   solidHeader = TRUE,
                                   fluidRow(
                                     column(3, 
-
                                            tags$div(
                                              uiOutput('cycleMessage'),
                                              style = "
-                                       width: 200px;  /* This line sets the width */
-                                       background: linear-gradient(to right, #3498db, #2980b9);
-                                       box-shadow: 0 1px 1px 0 rgba(0, 0, 0, 0.2);
-                                       color: white;
-                                       padding: 1px 1px;
-                                       font-size: 15px;
-                                       border-radius: 4px;
-                                       transition: all 0.3s ease-in-out;
-                                       font-family: 'Arial', sans-serif;
-                                       border: 1px solid #3498db;  /* This line adds a thicker border */
-                                       &:hover {
-                                       background: linear-gradient(to right, #2980b9, #3498db);
-                                       }  "
+                             width: 200px;  /* This line sets the width */
+                             background: linear-gradient(to right, #3498db, #2980b9);
+                             box-shadow: 0 1px 1px 0 rgba(0, 0, 0, 0.2);
+                             color: white;
+                             padding: 1px 1px;
+                             font-size: 15px;
+                             border-radius: 4px;
+                             transition: all 0.3s ease-in-out;
+                             font-family: 'Arial', sans-serif;
+                             border: 1px solid #3498db;  /* This line adds a thicker border */
+                             &:hover {
+                             background: linear-gradient(to right, #2980b9, #3498db);
+                             }  "
                                            ),
-
+                                           
                                            uiOutput("checkboxUI"),
-
+                                           
                                            fluidRow(
                                              uiOutput("removeButtonUI")
                                            )
-
+                                           
                                     ),
                                     column(5, 
-                                           # Container for the visNetwork plot and the title
-                                           tags$div(style = "position: relative;", 
-                                                    # Add padding to the container to push the plot down
-                                                    tags$div(visNetworkOutput("initialPlot"), style = "padding-top: 50px;"),
-                                                    # Title overlaid at the top of the visNetwork plot, now bold
-                                                    tags$div("Graph of possible whitelist", 
-                                                             br(),
-                                                             style = "position: absolute; top: 10px; left: 50%; transform: translate(-50%, 0); background-color: rgba(255,255,255,0.7); padding: 5px; border-radius: 5px; font-weight: bold;")
+                                           uiOutput("dynamicContent")
                                            )
-                                    ),
-                                    column(4, 
-                                           tags$div(style = "position: relative;", 
-                                                    # Add padding to the container to push the plot down
-                                                    tags$div(visNetworkOutput("plot"), style = "padding-top: 50px;"),
-                                                    # Title overlaid at the top of the visNetwork plot, now bold
-                                                    tags$div("Final Whitelist after Cycle check", 
-                                                             br(),
-                                                             style = "position: absolute; top: 10px; left: 50%; transform: translate(-50%, 0); background-color: rgba(255,255,255,0.7); padding: 5px; border-radius: 5px; font-weight: bold;")
-                                           )
-                                    )
                                   ),
                                   width = 12,
                                   collapsible = TRUE
@@ -775,6 +761,74 @@ $(document).on('click', '#goToTab', function() {
                               )
                             )
                           ),
+                          # --------------------------------------------------
+                          # --------------------------------------------------
+                          # tabPanel(
+                          #   title = "WhiteList Check acyclicity",
+                          #   fluidRow(
+                          #     column(
+                          #       12,
+                          #       box(
+                          #         title = "WhiteList Check acyclicity",
+                          #         status = "primary",
+                          #         solidHeader = TRUE,
+                          #         fluidRow(
+                          #           column(3, 
+                          # 
+                          #                  tags$div(
+                          #                    uiOutput('cycleMessage'),
+                          #                    style = "
+                          #              width: 200px;  /* This line sets the width */
+                          #              background: linear-gradient(to right, #3498db, #2980b9);
+                          #              box-shadow: 0 1px 1px 0 rgba(0, 0, 0, 0.2);
+                          #              color: white;
+                          #              padding: 1px 1px;
+                          #              font-size: 15px;
+                          #              border-radius: 4px;
+                          #              transition: all 0.3s ease-in-out;
+                          #              font-family: 'Arial', sans-serif;
+                          #              border: 1px solid #3498db;  /* This line adds a thicker border */
+                          #              &:hover {
+                          #              background: linear-gradient(to right, #2980b9, #3498db);
+                          #              }  "
+                          #                  ),
+                          # 
+                          #                  uiOutput("checkboxUI"),
+                          # 
+                          #                  fluidRow(
+                          #                    uiOutput("removeButtonUI")
+                          #                  )
+                          # 
+                          #           ),
+                          #           column(5, 
+                          #                  # Container for the visNetwork plot and the title
+                          #                  tags$div(style = "position: relative;", 
+                          #                           # Add padding to the container to push the plot down
+                          #                           tags$div(visNetworkOutput("initialPlot"), style = "padding-top: 50px;"),
+                          #                           # Title overlaid at the top of the visNetwork plot, now bold
+                          #                           tags$div("Graph of possible whitelist", 
+                          #                                    br(),
+                          #                                    style = "position: absolute; top: 10px; left: 50%; transform: translate(-50%, 0); background-color: rgba(255,255,255,0.7); padding: 5px; border-radius: 5px; font-weight: bold;")
+                          #                  )
+                          #           ),
+                          #           column(4, 
+                          #                  tags$div(style = "position: relative;", 
+                          #                           # Add padding to the container to push the plot down
+                          #                           tags$div(visNetworkOutput("plot"), style = "padding-top: 50px;"),
+                          #                           # Title overlaid at the top of the visNetwork plot, now bold
+                          #                           tags$div("Final Whitelist after Cycle check", 
+                          #                                    br(),
+                          #                                    style = "position: absolute; top: 10px; left: 50%; transform: translate(-50%, 0); background-color: rgba(255,255,255,0.7); padding: 5px; border-radius: 5px; font-weight: bold;")
+                          #                  )
+                          #           )
+                          #         ),
+                          #         width = 12,
+                          #         collapsible = TRUE
+                          #       )
+                          #     )
+                          #   )
+                          # ),
+                          # --------------------------------------------------
                           # Second TabPanel
                           tabPanel(
                             title = "Final Whitelist", 
@@ -1098,7 +1152,8 @@ observeEvent(input$userSelected_Status, {
   #-------------
   update_clicked <- reactiveVal(TRUE)
   observeEvent(input$updateButton, {
-  selectedInputs$status <- input$userSelectedStatus
+  selectedInputs$status <- input$userSelected_Status
+  # selectedInputs$status <- input$userSelectedStatus #(First version)
   selectedInputs$keyFeature <- input$userSelected_key_feature
   selectedInputs$secondaryFeature <- input$selectedCellType
   update_clicked(TRUE)
@@ -1108,8 +1163,8 @@ observeEvent(input$userSelected_Status, {
 
 
   #------------------------------------------------
-  # Reactive value to track if the dataset contains binary columns
-  hasBinaryColumns <- reactiveVal(FALSE)
+  # Reactive value to track if the dataset contains categorical columns
+  has.Categorical.Columns <- reactiveVal(FALSE)
   cycles_resolved <- reactiveVal(TRUE)
   
  
@@ -1117,7 +1172,7 @@ observeEvent(input$userSelected_Status, {
   currentTab <- input$sidebarMenu
   print(paste("Current tab:", currentTab))
 
-  if(currentTab == "contour_plot" && !hasBinaryColumns()) {
+  if(currentTab == "contour_plot" && !has.Categorical.Columns()) {
     print("Navigated to Comparative Analysis")
     showModal(modalDialog(
       tags$div(
@@ -1128,7 +1183,7 @@ observeEvent(input$userSelected_Status, {
             icon("exclamation-triangle", style = "margin-right: 6px; color: #d68910;"), 
             tags$span(style = "font-weight: bold;", "Analysis Not Possible: ")
           ),
-          "Your dataset does not contain any binary columns, which are required for generating Comparative Analysis graphs. Please ensure that your dataset includes at least one binary column to proceed with this analysis."
+          "Your dataset does not contain any categorical columns, which are required for generating Comparative Analysis graphs. Please ensure that your dataset includes at least one categorical column to proceed with this analysis."
         )
       ),
       footer = tagList(
@@ -1401,6 +1456,9 @@ observeEvent(input$userSelected_Status, {
   
   possible_whitelist_reactiveVal <- reactiveVal(NULL)
   final_white_list <- reactiveVal(NULL)
+  
+  No_Cycle_plot <- reactiveVal(FALSE)  # to track if default data is used
+  
   
   plot_done <- reactiveVal(FALSE)
   # finished_running <- reactiveVal(FALSE)
@@ -1859,6 +1917,7 @@ observeEvent(input$userSelected_Status, {
         observe({
           cycles <- FindCycles(g())
           if (length(cycles) == 0) {
+            No_Cycle_plot(TRUE)
             final_white_list(possible_whitelist_reactiveVal())
             output$final_white_list <- renderStyledTable(final_white_list(), rownames = TRUE, download_version = c('csv', 'excel'))
             
@@ -1871,10 +1930,10 @@ observeEvent(input$userSelected_Status, {
             
             output$plot <- renderVisNetwork({
               visNetwork(nodes = vis_graph()$nodes, edges = vis_graph()$edges) %>%
-                visNodes(shape = "circle", color = list(background = "#87CEEB")) %>%
+                visNodes(shape = "circle", color = list(background = "#32a89e")) %>%
                 visEdges(arrows = "to",
                          smooth = TRUE,
-                         font = list(size = 15, color = "black", background = 'rgba(255, 255, 255, 0.7)')) %>%
+                         font = list(size = 15, color = "black", background = '#32a89e')) %>%
                 visOptions(highlightNearest = list(enabled = F, hover = F),
                            nodesIdSelection = F)%>%
                 visLayout(randomSeed = 123,
@@ -1887,79 +1946,38 @@ observeEvent(input$userSelected_Status, {
             })
             
             # --------------------------------------
-            # Detect binary columns
-            # observe({
-            # req(data())
-
-            #   binary_cols <- sapply(data(), function(x) all(x %in% c(0, 1)))
-            #   binary_col_names <- names(binary_cols[binary_cols])
-            #     print(binary_col_names)
-            #   print(length(binary_col_names))
-            #   if (length(binary_col_names) == 1) {
-            #     # If there's exactly one binary column, use it as Status
-            #     updateSelectInput(session, "userSelected_Status", choices = binary_col_names, selected = binary_col_names[1])
-            #   } else {
-            #     # If there are multiple binary columns, let the user choose
-            #     updateSelectInput(session, "userSelected_Status", choices = binary_col_names)
-            #   }
-            # })
+            # categorical_cols <- sapply(data(), function(x) { all(x %in% as.integer(x)) })
+            
             observe({
               req(fileInputState()) # Ensure a file is selected
 
-              binary_cols <- sapply(data(), function(x) all(x %in% c(0, 1)))
-              binary_col_names <- names(binary_cols[binary_cols])
-              print(binary_col_names)
-              print(length(binary_col_names))
+              categorical_cols <- sapply(data(), function(x) { all(x %in% as.integer(x)) })
+              categorical_col_names <- names(categorical_cols[categorical_cols])
+              print(categorical_col_names)
+              print(length(categorical_col_names))
               
-              if (length(binary_col_names) == 0) {  
-                # No binary columns found, update var
-                hasBinaryColumns(FALSE)
-              } else if (length(binary_col_names) == 1) {
+              if (length(categorical_col_names) == 0) {  
+                # No categorical columns found, update var
+                has.Categorical.Columns(FALSE)
+              } else if (length(categorical_col_names) == 1) {
 
-                hasBinaryColumns(TRUE)
-                # If there's exactly one binary column, use it as Status
-                updateSelectInput(session, "userSelected_Status", choices = binary_col_names, selected = binary_col_names[1])
+                has.Categorical.Columns(TRUE)
+                # If there's exactly one categorical column, use it as Status
+                updateSelectInput(session, "userSelected_Status", choices = categorical_col_names, selected = categorical_col_names[1])
               } else {
-                hasBinaryColumns(TRUE)
-                # If there are multiple binary columns, let the user choose
+                has.Categorical.Columns(TRUE)
+                # If there are multiple categorical columns, let the user choose
                   current_status <- input$userSelected_Status
-                  if (!is.null(current_status) && current_status %in% binary_col_names) {
+                  if (!is.null(current_status) && current_status %in% categorical_col_names) {
                   # Current selection is valid, do nothing
                   print("Current selection is already valid.")
                 } else {
                   # Update because the current selection is not valid or not set
-                  updateSelectInput(session, "userSelected_Status", choices = binary_col_names)
+                  updateSelectInput(session, "userSelected_Status", choices = categorical_col_names)
                 }
               }
             })
-
             
-            # Assuming 'data' is a reactive expression returning your dataset
-          # observe({
-          #   # Update choices for 'Choose Status:'
-          #   updateSelectInput(session, "userSelected_Status", choices = names(data()))
-          # })
-  
-      # observeEvent(input$updateButton, {
-        
-      #   # Update reactive values with current selections
-      #   selectedStatus(input$userSelected_Status)
-      #   selectedKeyFeature(input$userSelected_key_feature)
-      #   selectedSecondaryFeature(input$selectedCellType)
-  
-      #   # For demonstration, let's print the selections. Replace this with your actual logic.
-      #   print(paste("Status Selected:", input$userSelected_Status))
-      #   print(paste("Key Feature Selected:", input$userSelected_key_feature))
-      #   print(paste("Secondary Feature Selected:", input$selectedCellType))
-
-      #   # Now you can trigger any reactive expressions or render functions that depend on these selections.
-      #   # E.g., updating a plot, a table, or any computation that uses these inputs.
-        
-      #   # If those updates were previously in reactive expressions or observe blocks directly tied to the dropdown inputs,
-      #   # you'll move that logic here, or better, into reactive expressions or functions called from here.
-      # })
-
-
   
       observeEvent(input$userSelected_Status, {
         # Fetch all column names except for the selected status
@@ -2099,6 +2117,49 @@ observeEvent(input$userSelected_Status, {
             
         })
         # --------------------------------------2
+        # --------------------------------------
+        # Dynamic content based on No_Cycle_plot
+        output$dynamicContent <- renderUI({
+          if (No_Cycle_plot()) {
+            tags$div(
+              style = "position: relative;",
+              tags$div(visNetworkOutput("initialPlot"), style = "padding-top: 50px;"),
+              tags$div(
+                "Final Whitelist (No Cycle found)",
+                br(),
+                style = "position: absolute; top: 10px; left: 50%; transform: translate(-50%, 0); background-color: rgba(255,255,255,0.7); padding: 5px 10px; border-radius: 5px; font-weight: bold; white-space: nowrap;"
+              )
+            )
+          } else {
+            fluidRow(
+              column(6,
+                     style = "position: relative; border-right: 2px solid rgba(0, 0, 0, 0.1);",  # Adding a right border to separate the columns
+                     visNetworkOutput("initialPlot"),
+                     style = "padding-top: 50px;",
+                     tags$div(
+                       "Graph of possible whitelist",
+                       br(),
+                       style = "position: absolute; top: 10px; left: 50%; transform: translate(-50%, 0); background-color: rgba(255,255,255,0.7); padding: 5px 10px; border-radius: 5px; font-weight: bold; white-space: nowrap;"
+                     )
+              ),
+              column(6,
+                     style = "padding-left: 20px;",  # Adjusts spacing to the left of the second column
+                     tags$div(
+                       style = "position: relative;",
+                       visNetworkOutput("plot"), 
+                       style = "padding-top: 50px;",
+                       tags$div(
+                         "Final Whitelist after Cycle check",
+                         br(),
+                         style = "position: absolute; top: 10px; left: 50%; transform: translate(-50%, 0); background-color: rgba(255,255,255,0.7); padding: 5px 10px; border-radius: 5px; font-weight: bold; white-space: nowrap;"
+                       )
+                     )
+              )
+            )
+          }
+        })
+        # --------------------------------------
+        
         output$checkboxUI <- renderUI({
           tryCatch({
             # Inside tryCatch to catch potential errors
@@ -2114,11 +2175,12 @@ observeEvent(input$userSelected_Status, {
             # Check if cycles are empty and Define output$cycleMessage
             output$cycleMessage <- renderUI({
               if (length(cycles) == 0) {
-                HTML("<strong>There are no cycles</strong>")
+                No_Cycle_plot(TRUE)
+                HTML("<strong>There is no cycle</strong>")
               } else {
                 num_cycles <- length(cycles)
                 if (num_cycles == 1) {
-                  HTML(paste("<strong>There is", num_cycles, "cycle</strong>"))
+                  HTML(paste("<strong>There is one cycle</strong>"))
                 } else {
                   HTML(paste("<strong>There are", num_cycles, "cycles</strong>"))
                 }
@@ -2186,6 +2248,7 @@ observeEvent(input$userSelected_Status, {
           # ----------------
           # Check if there are no cycles
           if (length(cycles) == 0) {
+            No_Cycle_plot(TRUE)
             print("If condition:possible_whitelist_reactiveVal:")
             print(possible_whitelist_reactiveVal())
             print(possible.white.list)
@@ -2229,11 +2292,17 @@ observeEvent(input$userSelected_Status, {
               list(nodes = nodes_data, edges = edges_data)
             })
             
+            
+            
+            # -------------------------------------
             output$plot <- renderVisNetwork({
               visNetwork(nodes = vis_graph()$nodes, edges = vis_graph()$edges) %>%
-                visNodes(shape = "circle", color = list(background = "#87CEEB")) %>%
-                visEdges(arrows = "to") %>%
-                visOptions(highlightNearest = list(enabled = TRUE, hover = TRUE))%>%
+                visNodes(shape = "circle", color = list(background = "#32a89e")) %>%
+                visEdges(arrows = "to",
+                         smooth = TRUE,
+                         font = list(size = 15, color = "black", background = '#32a89e')) %>%
+                visOptions(highlightNearest = list(enabled = F, hover = F),
+                           nodesIdSelection = F)%>%
                 visLayout(randomSeed = 123,
                           improvedLayout = TRUE)  %>%
                 visPhysics(solver = "forceAtlas2Based",  # The physics solver
@@ -2243,6 +2312,24 @@ observeEvent(input$userSelected_Status, {
                                                    springConstant = 0.18))  # Adjust as needed
             })
           }
+            # ----------------------------------
+            
+          #   output$plot <- renderVisNetwork({
+          #     visNetwork(nodes = vis_graph()$nodes, edges = vis_graph()$edges) %>%
+          #       visNodes(shape = "circle", color = list(background = "#32a89e")) %>%
+          #       visEdges(arrows = "to") %>%
+          #       visOptions(highlightNearest = list(enabled = TRUE, hover = TRUE))%>%
+          #       visLayout(randomSeed = 123,
+          #                 improvedLayout = TRUE)  %>%
+          #       visPhysics(solver = "forceAtlas2Based",  # The physics solver
+          #                  forceAtlas2Based = list(gravitationalConstant = -50,  # Adjust as needed
+          #                                          centralGravity = 0.005,  # Adjust as needed
+          #                                          springLength = 100,  # Adjust as needed
+          #                                          springConstant = 0.18))  # Adjust as needed
+          #   })
+          # }
+          # ----------------------------------
+          
           # cycles_resolved(TRUE)
           # # Cycle resolution process is completed, remove the modal
           # removeModal()
@@ -2322,37 +2409,37 @@ observeEvent(input$userSelected_Status, {
           })
           # --------------------------------------
           
-          # Detect binary columns and set up Status options
+          # Detect categorical columns and set up Status options
   
 
             observe({
               req(fileInputState()) # Ensure a file is selected
 
 
-              binary_cols <- sapply(data(), function(x) all(x %in% c(0, 1)))
-              binary_col_names <- names(binary_cols[binary_cols])
-              print(binary_col_names)
-              print(length(binary_col_names))
+              categorical_cols <- sapply(data(), function(x) { all(x %in% as.integer(x)) })
+              categorical_col_names <- names(categorical_cols[categorical_cols])
+              print(categorical_col_names)
+              print(length(categorical_col_names))
               
-              if (length(binary_col_names) == 0) {
-                # No binary columns found, UPDATE VAR
-                hasBinaryColumns(FALSE)
+              if (length(categorical_col_names) == 0) {
+                # No categorical columns found, UPDATE VAR
+                has.Categorical.Columns(FALSE)
 
-              } else if (length(binary_col_names) == 1) {
-                hasBinaryColumns(TRUE)
+              } else if (length(categorical_col_names) == 1) {
+                has.Categorical.Columns(TRUE)
 
-                # If there's exactly one binary column, use it as Status
-                updateSelectInput(session, "userSelected_Status", choices = binary_col_names, selected = binary_col_names[1])
+                # If there's exactly one categorical column, use it as Status
+                updateSelectInput(session, "userSelected_Status", choices = categorical_col_names, selected = categorical_col_names[1])
               } else {
-                hasBinaryColumns(TRUE)
-                # If there are multiple binary columns, let the user choose
+                has.Categorical.Columns(TRUE)
+                # If there are multiple categorical columns, let the user choose
                   current_status <- input$userSelected_Status
-                  if (!is.null(current_status) && current_status %in% binary_col_names) {
+                  if (!is.null(current_status) && current_status %in% categorical_col_names) {
                   # Current selection is valid, do nothing
                   print("Current selection is already valid.")
                 } else {
                   # Update because the current selection is not valid or not set
-                  updateSelectInput(session, "userSelected_Status", choices = binary_col_names)
+                  updateSelectInput(session, "userSelected_Status", choices = categorical_col_names)
                 }
               }
             })
@@ -2368,7 +2455,7 @@ observeEvent(input$userSelected_Status, {
             if( (update_clicked() || !contour_plot_initial()) && (currentTab == "contour_plot" )){
                 print("UPDATE IS CLICKED")
 
-             if(hasBinaryColumns()){
+             if(has.Categorical.Columns()){
   
                   showModal(modalDialog(
                   tags$div(
@@ -2453,7 +2540,6 @@ observeEvent(input$userSelected_Status, {
 
 
   output$contour_plot <- renderPlot({
-    print("I AM GROOT")
   # Ensure the user has selected a key feature and plots_list is not null
   req(selectedCellType, !is.null(plots_list()))
   
@@ -2473,6 +2559,9 @@ observeEvent(input$userSelected_Status, {
 
 
   # Debug: Check if the key feature exists in plots_list
+
+
+
   if(selectedCellType %in% names(plots_list())) {
     cat("selected cell type found in plots_list\n")
   } else {
@@ -2482,12 +2571,14 @@ observeEvent(input$userSelected_Status, {
   # Assuming plots_list contains ggplot objects or similar
   # Render the plot corresponding to the selected key feature
   plot_to_render <- plots_list()[[selectedCellType]]
+
+
   if(!is.null(plot_to_render)) {
     print(plot_to_render)
   } else {
     cat("Plot for selected key feature is NULL\n")
   }
-  if(hasBinaryColumns()){
+  if(has.Categorical.Columns()){
     contour_plot_initial(TRUE)
      removeModal()
       # update_clicked(FALSE)
@@ -2595,15 +2686,37 @@ observeEvent(input$userSelected_Status, {
         style = "font-size:18px; color:#34495E; padding: 10px 20px; background-color: #EAECEE; border-bottom-left-radius: 5px; border-bottom-right-radius: 5px;",
         tags$p(
           tags$span(
-            style = "color: #d68910 ;", 
+            style = "color: #d68910;", 
             icon("exclamation-triangle", style = "margin-right: 6px; color: #d68910;"), 
             tags$span(style = "font-weight: bold;", "Notification: ")
           ), 
-          "Default files have been successfully loaded.", tags$br(), "Please hit the ", 
-          tags$span(tags$span(style = "font-weight: bold; color:#2980B9;", "Run Discovery"), icon("fas fa-hand-pointer fa-rotate-180", style="margin-right: 4px;")), 
-          " to proceed."      
+          "Default files have been successfully loaded.", tags$br(), 
+          "Please hit the ", 
+          tags$span(
+            style = "font-weight: bold; color:#2980B9;", 
+            "Run Discovery"
+          ), 
+          " button to proceed.",
+          tags$span(
+            class = "fas fa-hand-pointer", 
+            style = "transform: rotate(180deg); margin-left: 4px; display: inline-block;"
+          )
         )
       ),
+      # ---------------------
+      # tags$div(
+      #   style = "font-size:18px; color:#34495E; padding: 10px 20px; background-color: #EAECEE; border-bottom-left-radius: 5px; border-bottom-right-radius: 5px;",
+      #   tags$p(
+      #     tags$span(
+      #       style = "color: #d68910 ;", 
+      #       icon("exclamation-triangle", style = "margin-right: 6px; color: #d68910;"), 
+      #       tags$span(style = "font-weight: bold;", "Notification: ")
+      #     ), 
+      #     "Default files have been successfully loaded.", tags$br(), "Please hit the ", 
+      #     tags$span(tags$span(style = "font-weight: bold; color:#2980B9;", "Run Discovery"), icon("fas fa-hand-pointer fa-rotate-180", style="margin-right: 4px;")), 
+      #     " to proceed."      
+      #   )
+      # ),
       # ----------------
       easyClose = TRUE,
       footer = NULL
@@ -2612,19 +2725,19 @@ observeEvent(input$userSelected_Status, {
   # ------------------------------- 
   # observe({
   # req(data())
-  # # Detect binary columns
-  # binary_cols <- sapply(data(), function(x) all(x %in% c(0, 1)))
-  # binary_col_names <- names(binary_cols[binary_cols])
+  # # Detect categorical columns
+  # categorical_cols <- sapply(data(), function(x) { all(x %in% as.integer(x)) })
+  # categorical_col_names <- names(categorical_cols[categorical_cols])
   # print("im in 3")
-  # print(binary_col_names)
-  # print(length(binary_col_names))
+  # print(categorical_col_names)
+  # print(length(categorical_col_names))
 
-  # if (length(binary_col_names) == 1) {
-  #   # If there's exactly one binary column, use it as Status
-  #   updateSelectInput(session, "userSelected_Status", choices = binary_col_names, selected = binary_col_names[1])
+  # if (length(categorical_col_names) == 1) {
+  #   # If there's exactly one categorical column, use it as Status
+  #   updateSelectInput(session, "userSelected_Status", choices = categorical_col_names, selected = categorical_col_names[1])
   # } else {
-  #   # If there are multiple binary columns, let the user choose
-  #   updateSelectInput(session, "userSelected_Status", choices = binary_col_names)
+  #   # If there are multiple categorical columns, let the user choose
+  #   updateSelectInput(session, "userSelected_Status", choices = categorical_col_names)
   # }
   observe({
   req(data()) # Ensure a file is selected
@@ -2633,10 +2746,10 @@ observeEvent(input$userSelected_Status, {
   current_status <- input$userSelected_Status
 
 
-  binary_cols <- sapply(data(), function(x) all(x %in% c(0, 1)))
-  binary_col_names <- names(binary_cols[binary_cols])
-  print(binary_col_names)
-  print(length(binary_col_names))
+  categorical_cols <- sapply(data(), function(x) { all(x %in% as.integer(x)) })
+  categorical_col_names <- names(categorical_cols[categorical_cols])
+  print(categorical_col_names)
+  print(length(categorical_col_names))
   
   print("hi im current status")
   print(current_status)
@@ -2644,25 +2757,25 @@ observeEvent(input$userSelected_Status, {
   userChangedStatus <- isTRUE(userSelected()) 
 
 
-  if (length(binary_col_names) == 0) {
-      hasBinaryColumns(FALSE)
+  if (length(categorical_col_names) == 0) {
+      has.Categorical.Columns(FALSE)
    
-  } else if (length(binary_col_names) == 1) {
-      hasBinaryColumns(TRUE)
+  } else if (length(categorical_col_names) == 1) {
+      has.Categorical.Columns(TRUE)
 
-    # If there's exactly one binary column, use it as Status
-    updateSelectInput(session, "userSelected_Status", choices = binary_col_names, selected = binary_col_names[1])
+    # If there's exactly one categorical column, use it as Status
+    updateSelectInput(session, "userSelected_Status", choices = categorical_col_names, selected = categorical_col_names[1])
   } else {
-      hasBinaryColumns(TRUE)
+      has.Categorical.Columns(TRUE)
 
-      # If there are multiple binary columns, let the user choose
+      # If there are multiple categorical columns, let the user choose
         current_status <- input$userSelected_Status
-        if (!is.null(current_status) && current_status %in% binary_col_names) {
+        if (!is.null(current_status) && current_status %in% categorical_col_names) {
         # Current selection is valid, do nothing
         print("Current selection is already valid.")
       } else {
         # Update because the current selection is not valid or not set
-        updateSelectInput(session, "userSelected_Status", choices = binary_col_names)
+        updateSelectInput(session, "userSelected_Status", choices = categorical_col_names)
       }
     }
 

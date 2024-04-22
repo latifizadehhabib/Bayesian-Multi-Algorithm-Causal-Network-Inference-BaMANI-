@@ -10,7 +10,12 @@ diagnostic_plot_White_Final <- function(num.white_thresh, num_arcs.All.thresh, T
   rownames(num.arcs.All.thresh) <- seq_len(nrow(num.arcs.All.thresh))
   rownames(Tot.BIC.thresh) <- seq_len(nrow(Tot.BIC.thresh))
   
-  
+  # Debugging
+  cat("num.white.thresh rows:", nrow(num.white.thresh), "\n")
+  cat("num.arcs.All.thresh rows:", nrow(num.arcs.All.thresh), "\n")
+  cat("Tot.BIC.thresh rows:", nrow(Tot.BIC.thresh), "\n")
+
+
   x1 <- seq_len(nrow(num.white.thresh))
   x2 <- seq_len(nrow(num.arcs.All.thresh))
   x3 <- seq_len(nrow(Tot.BIC.thresh))
