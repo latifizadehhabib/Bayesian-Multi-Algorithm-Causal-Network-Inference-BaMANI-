@@ -99,17 +99,17 @@ packages <- c("purrr", "parallel", "DT","shinydashboard", "shiny","colorspace", 
               "tidyverse", "plotly", "ggplot2", "reshape2", "metR", "fields", "scatterplot3d", "matrixStats", "rgl", 
               "readr", "igraph", "dplyr", "cowplot", "knitr", "visNetwork", "scales", "RColorBrewer", "reticulate") #, "rlang"
 
-source_files <- c("data_process_Correlation.v2.R", "run_algorithm_directed.R", "run_algorithm_Undirected.R", "augmented_edge_table.R",
+source_files <- c("data_process_Correlation.R", "run_algorithm_directed.R", "run_algorithm_Undirected.R", "augmented_edge_table.R",
                   "uninformative_arcs_removal.R", "finding_threshold_values.R", 
                   
                   "temp.white_thresh.cols.R", 
                   "calculate_loss_npar_table.R", 
-                  "calculate_bic.R", "find_min_bic.Parent_whitelist_acyclic.v3.R",
-                  "Final.DAG_network_plot_v6.R",
+                  "calculate_bic.R", "find_min_bic.Parent_whitelist_acyclic.R",
+                  "Final.DAG_network_plot.R",
                   "Contour_plot_userSelected_feature.R",
                   "generatePlot.R",
                   "DAG_network_plot.arc.lable.R", 
-                  "Diagnostic_plot.v3.R",
+                  "Diagnostic_plot.R",
                   "diagnostic_plot_White_Final.R", 
                   "plot_Algorithm.Count_arcs.strength.R",
                   "renderStyledTable.R"
@@ -1216,27 +1216,6 @@ observeEvent(input$userSelected_Status, {
       )
     )
   })
-  # ----------------------------------
-  # observeEvent(input$show_WhiteListFile, {
-  #   showModal(
-  #     modalDialog(
-  #       title = tags$span(
-  #         tags$i(class = "fas fa-info-circle", style = "color: white; padding-right: 10px;"), 
-  #         "WhiteList File  and format", 
-  #         style = "font-size: smaller; color: white; background-color: #3c8dbc; padding: 10px;"
-  #       ), 
-  #       size = "m",
-  #       tagList(
-  #         tags$p(
-  #           HTML("Upload the <code>WhiteList</code> file in CSV format."), 
-  #           br(),
-  #           HTML("The <code>WhiteList</code> operates as a user-defined input and is crucial in structuring and refining Bayesian networks, illustrated as Directed Acyclic Graphs (DAGs). It is designed to facilitate the inclusion of specific arcs (directed edges) in the proposed network, based on the strength of evidence supporting the existence of an arc, or alternatively, the <code>arc strength</code>. Arcs with strength below a predetermined threshold are incorporated in the <code>Whitelist</code>, ensuring that the evolving network structure is enriched with potential causal relationships that are substantiated by a robust degree of evidence. This approach optimizes the balance between model accuracy and complexity, allowing for a more nuanced and precise representation of causal relationships within the network while maintaining interpretability and coherence. In essence, the \"Whitelist\" serves as an inclusive filter, allowing arcs that meet or exceed certain criteria to shape and refine the network's structure, thereby enhancing the reliability and validity of the inferred causal relationships."),
-  #           style = "font-size: medium; padding: 5px;")
-  #       ),
-  #       easyClose = TRUE
-  #     )
-  #   )
-  # })
   # ---------------------------------- Instruction
   observeEvent(input$show_Dir_AlgoDescriptions, {
     showModal(
@@ -1349,18 +1328,6 @@ observeEvent(input$userSelected_Status, {
           showNotification(paste("Error reading BlackList File:", e$message), type = "error")
         })
       })
-      
-      # observeEvent(input$WhiteListFile, {
-      #   tryCatch({
-      #     White_List.check <- input$WhiteListFile
-      #     if (!is.null(White_List.check$datapath) && file.exists(White_List.check$datapath)) {
-      #       White_List(read.csv(White_List.check$datapath))
-      #       print("White_List uploaded")
-      #     }
-      #   }, error = function(e) {
-      #     showNotification(paste("Error reading WhiteList File:", e$message), type = "error")
-      #   })
-      # })
       #---------
 
 
@@ -1458,7 +1425,7 @@ observeEvent(input$userSelected_Status, {
         rand <- clusterEvalQ(cl, runif(10))  # Generate random numbers using cluster
         
         # Data processing
-        data_process_result <- data_process_Correlation.v2(data())
+        data_process_result <- data_process_Correlation(data())
         
         # -----------------
         output$viewDataStructure <- renderPrint({
@@ -1474,44 +1441,6 @@ observeEvent(input$userSelected_Status, {
         
         corrcoef<- as.data.frame(data_process_result$corrcoef)
         # data<- as.data.frame(data_process_result$data)
-        
-        # -----------------
-        # renderStyledTable <- function(table_name, rownames = TRUE, download_version = c()) {
-        #   renderDT({
-        #     datatable(
-        #       table_name,
-        #       extensions = c('Buttons', 'Scroller'),
-        #       options = list(
-        #         dom = 'Bfrtip',
-        #         buttons = download_version,
-        #         pageLength = 10, # Changed this from 10 to 5.
-        #         autoWidth = TRUE,
-        #         scrollX = TRUE, # Already present and set to TRUE.
-        #         scroller = TRUE,
-        #         deferRender = TRUE,
-        #         scrollY = '400px',  # adjust this value to change visible height of table.
-        #         scrollCollapse = TRUE
-        #       ),
-        #       rownames = rownames,
-        #       class = 'compact stripe hover row-border order-column'
-        #     ) %>%
-        #       formatStyle(
-        #         columns = names(table_name),
-        #         backgroundColor = styleEqual(c(NA, 1), c("white", "#f7f9f9")),
-        #         color = 'black',
-        #         fontSize = '14px',
-        #         fontWeight = styleEqual(c(NA, 1), c("normal", "bold")),
-        #         lineHeight = '16px',
-        #         textAlign = 'center'
-        #       ) %>%
-        #       formatStyle(
-        #         columns = names(table_name),
-        #         borderTop = '1px solid #dee2e6',
-        #         borderBottom = '1px solid #dee2e6',
-        #         textAlign = 'center'
-        #       )
-        #   }, server = FALSE)
-        # }
         # -------------------------------
         output$Black_List <- renderStyledTable(Black_List(), rownames = TRUE, download_version = c('csv', 'excel'))
         # -------------------------------
@@ -1687,7 +1616,7 @@ observeEvent(input$userSelected_Status, {
         output$BIC_merged_table <- renderStyledTable(BIC_merged_table, rownames = TRUE, download_version = c('csv', 'excel'))
         # browser()
         
-        min_bic.Parent_whitelist_acyclic <- find_min_bic.Parent_whitelist_acyclic.v3(BIC_merged_table, npar_merged, parents_list_merged)
+        min_bic.Parent_whitelist_acyclic <- find_min_bic.Parent_whitelist_acyclic(BIC_merged_table, npar_merged, parents_list_merged)
         
         bic_min_table <- min_bic.Parent_whitelist_acyclic$bic_min_table
         possible.white.list <- min_bic.Parent_whitelist_acyclic$possible.white.list
@@ -1929,15 +1858,15 @@ observeEvent(input$userSelected_Status, {
             
              # plot_done(TRUE)
 
-            # Alg.Count_arcs.strength.table <- Final.DAG_network_plot_v6$Alg.Count_arcs.strength.table
-            # plots_list <- Final.DAG_network_plot_v6$plots_list
-            # plots_list(Final.DAG_network_plot_v6$plots_list)
+            # Alg.Count_arcs.strength.table <- Final.DAG_network_plot$Alg.Count_arcs.strength.table
+            # plots_list <- Final.DAG_network_plot$plots_list
+            # plots_list(Final.DAG_network_plot$plots_list)
             Contour_plot_userSelected_feature <- Contour_plot_userSelected_feature (data(), discretized_data,
                                                                                     fBRCABN(),
                                                                                     input$userSelected_Status,
                                                                                     input$userSelected_key_feature)
             
-            # plots_list <- Final.DAG_network_plot_v6$plots_list
+            # plots_list <- Final.DAG_network_plot$plots_list
             plots_list(Contour_plot_userSelected_feature)
          }
             )} else{
@@ -2158,7 +2087,7 @@ observeEvent(input$userSelected_Status, {
           # Adding other graphs after cycles are resolved
           #print("I CAME TO 5")
 
-            Final.DAG_network_plot_v6 <- Final.DAG_network_plot_v6 (augmented_edge_list,
+            Final.DAG_network_plot <- Final.DAG_network_plot (augmented_edge_list,
                                                                     possible_seed_arcs_filter,
                                                                     data(), discretized_data,
                                                                     final_white_list(),
@@ -2168,38 +2097,38 @@ observeEvent(input$userSelected_Status, {
             
              # plot_done(TRUE)
 
-            Alg.Count_arcs.strength.table <- Final.DAG_network_plot_v6$Alg.Count_arcs.strength.table
-            # plots_list <- Final.DAG_network_plot_v6$plots_list
-            # plots_list(Final.DAG_network_plot_v6$plots_list)
+            Alg.Count_arcs.strength.table <- Final.DAG_network_plot$Alg.Count_arcs.strength.table
+            # plots_list <- Final.DAG_network_plot$plots_list
+            # plots_list(Final.DAG_network_plot$plots_list)
             
             
-            fBRCABN(Final.DAG_network_plot_v6$fBRCABN)
+            fBRCABN(Final.DAG_network_plot$fBRCABN)
             
             Contour_plot_userSelected_feature <- Contour_plot_userSelected_feature (data(), discretized_data,
                                                                                     fBRCABN(),
                                                                                     input$userSelected_Status,
                                                                                     input$userSelected_key_feature)
             
-            # plots_list <- Final.DAG_network_plot_v6$plots_list
+            # plots_list <- Final.DAG_network_plot$plots_list
             plots_list(Contour_plot_userSelected_feature)
             
             
 
             output$DAG.Plot <- renderPlot({
-              # Final.DAG_network_plot_v6$DAG.Plot
-              Final.DAG_network_plot_v6$plotFunction()
+              # Final.DAG_network_plot$DAG.Plot
+              Final.DAG_network_plot$plotFunction()
             })
             
             
             # -----------------
             
-            arcs <- Final.DAG_network_plot_v6$arcs.BRCA
-            P_strength <- Final.DAG_network_plot_v6$P_strength
+            arcs <- Final.DAG_network_plot$arcs.BRCA
+            P_strength <- Final.DAG_network_plot$P_strength
             
-            arc_slopes.strength <- Final.DAG_network_plot_v6$arc_slopes.strength
+            arc_slopes.strength <- Final.DAG_network_plot$arc_slopes.strength
             
             output$Diagnostic_plot <- renderPlot({
-              Diagnostic_plot.v3(num.white_thresh, num_arcs.All.thresh, Total.BIC.thresh, threshold)
+              Diagnostic_plot(num.white_thresh, num_arcs.All.thresh, Total.BIC.thresh, threshold)
             })
             # --------------
             output$Plot.Algorithm.Count_arcs.strength <- renderPlot({
@@ -2207,10 +2136,10 @@ observeEvent(input$userSelected_Status, {
             })
             # DAG Network Plot
             output$DAGNetworkPlot <- renderVisNetwork({
-              network <- Final.DAG_network_plot_v6$network
+              network <- Final.DAG_network_plot$network
             })
-            # arc_slopes_strength <- Final.DAG_network_plot_v6$arc_slopes.strength
-            final_DAG_detail <- Final.DAG_network_plot_v6$final_DAG_detail
+            # arc_slopes_strength <- Final.DAG_network_plot$arc_slopes.strength
+            final_DAG_detail <- Final.DAG_network_plot$final_DAG_detail
             
             output$arc_slopes_strength <- renderStyledTable(final_DAG_detail, rownames = TRUE, download_version = c('csv', 'excel'))
 
@@ -2281,7 +2210,7 @@ observeEvent(input$userSelected_Status, {
                 ))
               }
 
-          #   Final.DAG_network_plot_v6 <- Final.DAG_network_plot_v6 (augmented_edge_list,
+          #   Final.DAG_network_plot <- Final.DAG_network_plot (augmented_edge_list,
           #                                                           possible_seed_arcs_filter,
           #                                                           data(), discretized_data,
           #                                                           final_white_list(),
@@ -2293,33 +2222,33 @@ observeEvent(input$userSelected_Status, {
           #   
           # 
           # 
-          # Alg.Count_arcs.strength.table <- Final.DAG_network_plot_v6$Alg.Count_arcs.strength.table
+          # Alg.Count_arcs.strength.table <- Final.DAG_network_plot$Alg.Count_arcs.strength.table
           
-          # plots_list(Final.DAG_network_plot_v6$plots_list)
-          # plots_list(Final.DAG_network_plot_v6$plots_list)
+          # plots_list(Final.DAG_network_plot$plots_list)
+          # plots_list(Final.DAG_network_plot$plots_list)
           Contour_plot_userSelected_feature <- Contour_plot_userSelected_feature (data(), discretized_data,
                                                                                   fBRCABN(),
                                                                                   input$userSelected_Status,
                                                                                   input$userSelected_key_feature)
           
-          # plots_list <- Final.DAG_network_plot_v6$plots_list
+          # plots_list <- Final.DAG_network_plot$plots_list
           plots_list(Contour_plot_userSelected_feature)
           
-          # DAG.Plot <- Final.DAG_network_plot_v6$DAG.Plot
+          # DAG.Plot <- Final.DAG_network_plot$DAG.Plot
 
           # output$DAG.Plot <- renderPlot({
-          #   # Final.DAG_network_plot_v6$DAG.Plot
-          #   Final.DAG_network_plot_v6$plotFunction()
+          #   # Final.DAG_network_plot$DAG.Plot
+          #   Final.DAG_network_plot$plotFunction()
           # })
           
           # -----------------
-          # arcs <- Final.DAG_network_plot_v6$arcs.BRCA
-          # P_strength <- Final.DAG_network_plot_v6$P_strength
+          # arcs <- Final.DAG_network_plot$arcs.BRCA
+          # P_strength <- Final.DAG_network_plot$P_strength
           # 
-          # arc_slopes.strength <- Final.DAG_network_plot_v6$arc_slopes.strength
+          # arc_slopes.strength <- Final.DAG_network_plot$arc_slopes.strength
           # 
           # output$Diagnostic_plot <- renderPlot({
-          #   Diagnostic_plot.v3(num.white_thresh, num_arcs.All.thresh, Total.BIC.thresh, threshold)
+          #   Diagnostic_plot(num.white_thresh, num_arcs.All.thresh, Total.BIC.thresh, threshold)
           #   
           # })
           # 
@@ -2329,11 +2258,11 @@ observeEvent(input$userSelected_Status, {
           # 
           # # DAG Network Plot
           # output$DAGNetworkPlot <- renderVisNetwork({
-          #   network <- Final.DAG_network_plot_v6$network
+          #   network <- Final.DAG_network_plot$network
           # })
           # 
-          # # arc_slopes_strength <- Final.DAG_network_plot_v6$arc_slopes.strength
-          # final_DAG_detail <- Final.DAG_network_plot_v6$final_DAG_detail
+          # # arc_slopes_strength <- Final.DAG_network_plot$arc_slopes.strength
+          # final_DAG_detail <- Final.DAG_network_plot$final_DAG_detail
           # 
           # output$arc_slopes_strength <- renderStyledTable(final_DAG_detail, rownames = TRUE, download_version = c('csv', 'excel'))
 
