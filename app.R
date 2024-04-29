@@ -111,8 +111,9 @@ source_files <- c("data_process_Correlation.v2.R", "run_algorithm_directed.R", "
                   "DAG_network_plot.arc.lable.R", 
                   "Diagnostic_plot.v3.R",
                   "diagnostic_plot_White_Final.R", 
-                  "plot_Algorithm.Count_arcs.strength.R"
-)#, "renderStyledTable.R" 
+                  "plot_Algorithm.Count_arcs.strength.R",
+                  "renderStyledTable.R"
+)#,  
 
 # Check &  instal missing packages & load source files
 load_required_packages(packages)
@@ -772,7 +773,7 @@ $(document).on('click', '#goToTab', function() {
                                   status = "primary",
                                   solidHeader = TRUE,
                                   div(
-                                    style = "width: 700px; height: 600px; overflow: auto;",
+                                    style = "width: 600px; height: 600px; overflow: auto;",
                                     DTOutput("bic_min_table")
                                   )
                                 ),
@@ -790,7 +791,7 @@ $(document).on('click', '#goToTab', function() {
                                   status = "info",
                                   solidHeader = TRUE,
                                   div(
-                                    style = "width: 700px; height: 400px; overflow: auto;",
+                                    style = "width: 600px; height: 600px; overflow: auto;",
                                     DTOutput("possible.white.list")
                                     
                                   )
@@ -1475,42 +1476,42 @@ observeEvent(input$userSelected_Status, {
         # data<- as.data.frame(data_process_result$data)
         
         # -----------------
-        renderStyledTable <- function(table_name, rownames = TRUE, download_version = c()) {
-          renderDT({
-            datatable(
-              table_name,
-              extensions = c('Buttons', 'Scroller'),
-              options = list(
-                dom = 'Bfrtip',
-                buttons = download_version,
-                pageLength = 10, # Changed this from 10 to 5.
-                autoWidth = TRUE,
-                scrollX = TRUE, # Already present and set to TRUE.
-                scroller = TRUE,
-                deferRender = TRUE,
-                scrollY = '400px',  # adjust this value to change visible height of table.
-                scrollCollapse = TRUE
-              ),
-              rownames = rownames,
-              class = 'compact stripe hover row-border order-column'
-            ) %>%
-              formatStyle(
-                columns = names(table_name),
-                backgroundColor = styleEqual(c(NA, 1), c("white", "#f7f9f9")),
-                color = 'black',
-                fontSize = '14px',
-                fontWeight = styleEqual(c(NA, 1), c("normal", "bold")),
-                lineHeight = '16px',
-                textAlign = 'center'
-              ) %>%
-              formatStyle(
-                columns = names(table_name),
-                borderTop = '1px solid #dee2e6',
-                borderBottom = '1px solid #dee2e6',
-                textAlign = 'center'
-              )
-          }, server = FALSE)
-        }
+        # renderStyledTable <- function(table_name, rownames = TRUE, download_version = c()) {
+        #   renderDT({
+        #     datatable(
+        #       table_name,
+        #       extensions = c('Buttons', 'Scroller'),
+        #       options = list(
+        #         dom = 'Bfrtip',
+        #         buttons = download_version,
+        #         pageLength = 10, # Changed this from 10 to 5.
+        #         autoWidth = TRUE,
+        #         scrollX = TRUE, # Already present and set to TRUE.
+        #         scroller = TRUE,
+        #         deferRender = TRUE,
+        #         scrollY = '400px',  # adjust this value to change visible height of table.
+        #         scrollCollapse = TRUE
+        #       ),
+        #       rownames = rownames,
+        #       class = 'compact stripe hover row-border order-column'
+        #     ) %>%
+        #       formatStyle(
+        #         columns = names(table_name),
+        #         backgroundColor = styleEqual(c(NA, 1), c("white", "#f7f9f9")),
+        #         color = 'black',
+        #         fontSize = '14px',
+        #         fontWeight = styleEqual(c(NA, 1), c("normal", "bold")),
+        #         lineHeight = '16px',
+        #         textAlign = 'center'
+        #       ) %>%
+        #       formatStyle(
+        #         columns = names(table_name),
+        #         borderTop = '1px solid #dee2e6',
+        #         borderBottom = '1px solid #dee2e6',
+        #         textAlign = 'center'
+        #       )
+        #   }, server = FALSE)
+        # }
         # -------------------------------
         output$Black_List <- renderStyledTable(Black_List(), rownames = TRUE, download_version = c('csv', 'excel'))
         # -------------------------------
