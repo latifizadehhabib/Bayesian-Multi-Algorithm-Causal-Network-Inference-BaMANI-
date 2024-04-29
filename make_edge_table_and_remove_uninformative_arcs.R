@@ -1,5 +1,11 @@
-# Making edge table and removing uninformative arcs
+# Making edge table & removing uninformative arcs
 make_edge_table_and_remove_uninformative_arcs <- function(algorithm_results, algorithm_directed, algorithm_undirected, threshold.level) {
+  
+  
+  
+  print("Starting 'make_edge_table_and_remove_uninformative_arcs' inputs:")
+  
+  
   source("augmented_edge_table.R")
   source("uninformative_arcs_removal.R")
   

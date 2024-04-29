@@ -1,6 +1,11 @@
 diagnostic_plot_White_Final <- function(num.white_thresh, num_arcs.All.thresh, Total.BIC.thresh) {
   
-  # unify the name of both data frame to plot them
+  
+  
+  
+  print("Starting 'diagnostic_plot_White_Final' inputs:")
+  
+  # unify name of both data frame to plot them
   num.white.thresh <- num.white_thresh
   num.arcs.All.thresh <- num_arcs.All.thresh
   Tot.BIC.thresh <- Total.BIC.thresh
@@ -20,7 +25,7 @@ diagnostic_plot_White_Final <- function(num.white_thresh, num_arcs.All.thresh, T
   x2 <- seq_len(nrow(num.arcs.All.thresh))
   x3 <- seq_len(nrow(Tot.BIC.thresh))
   
-  # define a function for min-max normalization to a range of [0, 100],
+  # function for min-max normalization to range of [0, 100],
   normalize <- function(x) {
     return((x - min(x)) / (max(x) - min(x))*1000)
     # return((x - min(x)) / (max(x) - min(x))*100)
@@ -42,14 +47,14 @@ diagnostic_plot_White_Final <- function(num.white_thresh, num_arcs.All.thresh, T
   
   # png("Diagnostic_plot_bic normal_today.png", width = 1500, height = 1500, res = 300)
   
-  # Combine the data frames and add a new column for the group
+  # Combine data frames and add new column for group
   num.white$group <- "Number of WhiteList"
   num.arcs$group <- "Number of Arcs in Final DAG"
   Tot.BIC$group <- "Total BIC"
   
   combine <- rbind(num.white, num.arcs, Tot.BIC)
   
-  # Plot the data frames
+  # Plot data frames
   plot <- ggplot(combine, aes(x = x, y = y, color = group)) +
     geom_line()+
     

@@ -1,4 +1,7 @@
 uninformative_arcs_removal <- function(augmented_edge_list, algorithm_undirected) {
+  
+  print("Starting 'uninformative_arcs_removal' inputs:")
+  
     
   # -------------------------new
   # possible_seed_arcs <- subset(augmented_edge_list, augmented_edge_list$Black_list != 1 |

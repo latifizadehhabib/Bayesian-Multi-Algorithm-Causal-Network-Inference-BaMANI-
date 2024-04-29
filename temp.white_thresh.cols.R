@@ -1,5 +1,11 @@
 temp.white_thresh.cols <- function(temp_possible_seed_arcs, threshold) {
   
+  
+  cat("------------------------------", "\n")
+  print("Starting 'temp.white_thresh.cols' inputs:")
+  cat("------------------------------", "\n")
+  
+  
 
 threshold <- c(as.integer(0), threshold)
 # Create columns for each threshold value

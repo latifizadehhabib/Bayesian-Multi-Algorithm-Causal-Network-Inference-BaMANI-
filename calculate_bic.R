@@ -1,9 +1,11 @@
-
-#----------------------------------------------------
-# 2nd version
-#----------------------------------------------------
-
 calculate_bic <- function(discretized_data, npar_merged, L1_merged, threshold) {
+  
+  
+  
+  cat("------------------------------", "\n")
+  print("Starting 'calculate_bic' inputs:")
+  cat("------------------------------", "\n")
+  
   
   temp_threshold <- c("empty_graph", 0, threshold, "all")
   num_sample <- nrow(discretized_data)
@@ -18,8 +20,8 @@ calculate_bic <- function(discretized_data, npar_merged, L1_merged, threshold) {
       BIC_merged <- cbind(BIC_merged, BIC_thresh)
       }
   # --------------
-  rownames(BIC_merged) <- BIC_merged$node  # Set the row names to the first column
-  BIC_merged <- BIC_merged[, -1]  # Remove the first column
+  rownames(BIC_merged) <- BIC_merged$node  # Set row names to first column
+  BIC_merged <- BIC_merged[, -1]  # Remove first column
   # --------------
   
   return(BIC_merged)
@@ -27,8 +29,6 @@ calculate_bic <- function(discretized_data, npar_merged, L1_merged, threshold) {
 
 
 
-# #----------------------------------------------------
-# # First version
 # #----------------------------------------------------
 # 
 # calculate_bic <- function(discretized_data, npar_merged, L1_merged, threshold) {

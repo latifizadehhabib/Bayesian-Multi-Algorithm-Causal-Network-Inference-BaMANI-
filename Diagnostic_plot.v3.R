@@ -1,6 +1,8 @@
 Diagnostic_plot.v3 <- function(num.white_thresh, num_arcs.All.thresh, Total.BIC.thresh, threshold){
   
-  # Extract the minimal length across all data sets
+  print("Starting 'Diagnostic_plot.v3' inputs:")
+  
+  # Extract minimal length across all data sets
   min_len <- min(length(num.white_thresh[, 1]), length(num_arcs.All.thresh[, 1]), length(Total.BIC.thresh[, 1]))
   
   # Extract data
@@ -9,7 +11,7 @@ Diagnostic_plot.v3 <- function(num.white_thresh, num_arcs.All.thresh, Total.BIC.
   y2 <- num_arcs.All.thresh[1:min_len, 1]
   y3 <- Total.BIC.thresh[1:min_len, 1]
   
-  # Combine data into a data frame
+  # Combine data into data frame
   Combine <- data.frame(x = as.numeric(x1),
                         num.white = as.numeric(y1),
                         num.arcs = as.numeric(y2),
@@ -17,7 +19,7 @@ Diagnostic_plot.v3 <- function(num.white_thresh, num_arcs.All.thresh, Total.BIC.
   
   threshold.temp <- signif(threshold, digits = 1)
   
-  # Define a color palette and a custom theme
+  # color palette and custom theme
   palette <- c("num.white" = "#0072B2", "num.arcs" = "#D55E00", "Tot.BIC" = "#009966")
   
   custom_theme <- theme_bw() + 
@@ -49,6 +51,6 @@ Diagnostic_plot.v3 <- function(num.white_thresh, num_arcs.All.thresh, Total.BIC.
     xlab("Threshold Level") +
     custom_theme
   
-  # Arrange and display the plots
+  # Arrange and display plots
   gridExtra::grid.arrange(p1, p2, ncol = 1)
 }

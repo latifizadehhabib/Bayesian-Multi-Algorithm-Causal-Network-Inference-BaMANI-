@@ -52,6 +52,7 @@ library("scales")
 library("RColorBrewer")
 library("reticulate")
 
+set.seed(123)  # Setting seed for reproducibility
 #-----------------------------------
 styled_title <- function(text, 
                          bgcolor = "#007BFF", 
@@ -92,7 +93,7 @@ load_source_files <- function(source_files) {
     source(source_file)
   }
 }
-# list of packages and source files
+# list of packages &  source files
 packages <- c("purrr", "parallel", "DT","shinydashboard", "shiny","colorspace", "stats", "bnlearn", "lattice", 
               "Rgraphviz", "MASS", "ggpubr", "snow", "grid", 
               "tidyverse", "plotly", "ggplot2", "reshape2", "metR", "fields", "scatterplot3d", "matrixStats", "rgl", 
@@ -105,13 +106,15 @@ source_files <- c("data_process_Correlation.v2.R", "run_algorithm_directed.R", "
                   "calculate_loss_npar_table.R", 
                   "calculate_bic.R", "find_min_bic.Parent_whitelist_acyclic.v3.R",
                   "Final.DAG_network_plot_v6.R",
+                  "Contour_plot_userSelected_feature.R",
+                  "generatePlot.R",
                   "DAG_network_plot.arc.lable.R", 
                   "Diagnostic_plot.v3.R",
                   "diagnostic_plot_White_Final.R", 
                   "plot_Algorithm.Count_arcs.strength.R"
-)#, "renderStyledTable.R"
+)#, "renderStyledTable.R" 
 
-# Check and install missing packages and load source files
+# Check &  instal missing packages & load source files
 load_required_packages(packages)
 load_source_files(source_files)
 # -----------------------------------
@@ -179,19 +182,13 @@ ui <- dashboardPage(
     # -----------
     tags$head(tags$style(HTML("
     .sweet-alert.alert-size-s {
-      width: 600px !important; /* Increase width as needed */
+      width: 600px !important; /* Increase  width as needed */
     }
     .swal-button--confirm {
       background-color: #3498db;
     }
   "))),
     # -----------
-  #   tags$head(tags$script(HTML("
-  # $(document).on('click', '#goToTab', function() {
-  #   $('a[data-value=\"WhiteList_Check_acyclicity\"]').click();
-  #   });
-  #                              "))),
-
   tags$script(HTML("
 $(document).on('click', '#goToTab', function() {
   $('a[data-value=\"WhiteList_Check_acyclicity\"]').click();
@@ -226,7 +223,7 @@ $(document).on('click', '#goToTab', function() {
                 # ---------------------
                 # UI
                 box(
-                  width = 4,
+                   width = 4,
                   title = styled_title("Settings", bgcolor = "#4CAF50"), # Apply styled_title
                   solidHeader = TRUE, 
                   status = "primary",
@@ -257,7 +254,7 @@ $(document).on('click', '#goToTab', function() {
                   # ----------------
                   fluidRow(
                     column(
-                      5, # Adjusted column width for better alignment
+                      5, # 
                       numericInput(inputId = "threshold_level",
                                    label = "Threshold Level",
                                    value = 5)
@@ -289,7 +286,7 @@ $(document).on('click', '#goToTab', function() {
                   # ----------------
                   fluidRow(
                     column(
-                      9, # Adjusted column width for better alignment
+                      9, # 
                      uiOutput("dynamicFileInput")
                     ),
                     column(
@@ -310,7 +307,7 @@ $(document).on('click', '#goToTab', function() {
                   # ----------------
                   fluidRow(
                     column(
-                      9, # Adjusted column width for better alignment
+                      9, # 
                       fileInput(
                         inputId = "BlackListFile",
                         label = "BlackList",
@@ -333,30 +330,6 @@ $(document).on('click', '#goToTab', function() {
                     )
                   ),
                   # ----------------
-                  fluidRow(
-                    column(
-                      9, # Adjusted column width for better alignment
-                      fileInput(
-                        inputId = "WhiteListFile",
-                        label = "WhiteList",
-                        accept = c("text/csv", "text/comma-separated-values,text/plain", ".csv")
-                      )
-                    ),
-                    column(
-                      1,
-                      div(
-                        HTML("<i id='info_WhiteListFile' class='fas fa-question-circle' style='color:blue; cursor:pointer;'></i>"),
-                        tags$script(
-                          HTML("
-          $(document).on('click', '#info_WhiteListFile', function(e) {
-            e.stopPropagation(); // Stop the event from propagating up to the fileInput
-            Shiny.setInputValue('show_WhiteListFile', Math.random());
-          });
-          ")
-                        )
-                      )
-                    )
-                  )
                 ),
                 # -----------------------------
                 box(
@@ -368,7 +341,7 @@ $(document).on('click', '#goToTab', function() {
                   # -----------------------------
                   fluidRow(
                     column(
-                      5,  # Adjusted column width for better alignment
+                      5,  # 
                       selectInput(
                         inputId = "algorithm_directed", 
                         label = "Directed Algorithms", 
@@ -392,7 +365,7 @@ $(document).on('click', '#goToTab', function() {
                   ),
                   fluidRow(
                     column(
-                      5,  # Adjusted column width for better alignment
+                      5,  # 
                       selectInput(         
                         inputId = "algorithm_undirected",
                         label = "Undirected Algorithms",
@@ -677,8 +650,7 @@ $(document).on('click', '#goToTab', function() {
                           )
               )
       ),
-      # ------------------------------------------------------------------------              
-      
+      # ------------------------------------------------------------------------            
       tabItem(tabName = "BIC_merged_table",
               h3("Bayesian Information Criterion (BIC) score for each node/ threshold "), 
               tags$p("Descriptin: Bayesian Information Criterion (BIC) score for each node/ threshold", 
@@ -761,73 +733,6 @@ $(document).on('click', '#goToTab', function() {
                               )
                             )
                           ),
-                          # --------------------------------------------------
-                          # --------------------------------------------------
-                          # tabPanel(
-                          #   title = "WhiteList Check acyclicity",
-                          #   fluidRow(
-                          #     column(
-                          #       12,
-                          #       box(
-                          #         title = "WhiteList Check acyclicity",
-                          #         status = "primary",
-                          #         solidHeader = TRUE,
-                          #         fluidRow(
-                          #           column(3, 
-                          # 
-                          #                  tags$div(
-                          #                    uiOutput('cycleMessage'),
-                          #                    style = "
-                          #              width: 200px;  /* This line sets the width */
-                          #              background: linear-gradient(to right, #3498db, #2980b9);
-                          #              box-shadow: 0 1px 1px 0 rgba(0, 0, 0, 0.2);
-                          #              color: white;
-                          #              padding: 1px 1px;
-                          #              font-size: 15px;
-                          #              border-radius: 4px;
-                          #              transition: all 0.3s ease-in-out;
-                          #              font-family: 'Arial', sans-serif;
-                          #              border: 1px solid #3498db;  /* This line adds a thicker border */
-                          #              &:hover {
-                          #              background: linear-gradient(to right, #2980b9, #3498db);
-                          #              }  "
-                          #                  ),
-                          # 
-                          #                  uiOutput("checkboxUI"),
-                          # 
-                          #                  fluidRow(
-                          #                    uiOutput("removeButtonUI")
-                          #                  )
-                          # 
-                          #           ),
-                          #           column(5, 
-                          #                  # Container for the visNetwork plot and the title
-                          #                  tags$div(style = "position: relative;", 
-                          #                           # Add padding to the container to push the plot down
-                          #                           tags$div(visNetworkOutput("initialPlot"), style = "padding-top: 50px;"),
-                          #                           # Title overlaid at the top of the visNetwork plot, now bold
-                          #                           tags$div("Graph of possible whitelist", 
-                          #                                    br(),
-                          #                                    style = "position: absolute; top: 10px; left: 50%; transform: translate(-50%, 0); background-color: rgba(255,255,255,0.7); padding: 5px; border-radius: 5px; font-weight: bold;")
-                          #                  )
-                          #           ),
-                          #           column(4, 
-                          #                  tags$div(style = "position: relative;", 
-                          #                           # Add padding to the container to push the plot down
-                          #                           tags$div(visNetworkOutput("plot"), style = "padding-top: 50px;"),
-                          #                           # Title overlaid at the top of the visNetwork plot, now bold
-                          #                           tags$div("Final Whitelist after Cycle check", 
-                          #                                    br(),
-                          #                                    style = "position: absolute; top: 10px; left: 50%; transform: translate(-50%, 0); background-color: rgba(255,255,255,0.7); padding: 5px; border-radius: 5px; font-weight: bold;")
-                          #                  )
-                          #           )
-                          #         ),
-                          #         width = 12,
-                          #         collapsible = TRUE
-                          #       )
-                          #     )
-                          #   )
-                          # ),
                           # --------------------------------------------------
                           # Second TabPanel
                           tabPanel(
@@ -956,8 +861,8 @@ $(document).on('click', '#goToTab', function() {
                                 box(
                                   title = "Comparative Analysis",
                                   status = "primary",
-                                  solidHeader = TRUE, # decide whether to have a solid header or not.
-                                  collapsible = TRUE, # decide whether to make it collapsible or not.
+                                  solidHeader = TRUE, # solid header or not.
+                                  collapsible = TRUE, 
                                   width = 12,
                                   fluidRow(
                                     box(
@@ -967,9 +872,6 @@ $(document).on('click', '#goToTab', function() {
                                       selectInput("userSelected_key_feature", "Choose Key Feature:", choices = NULL),
                                       selectInput("selectedCellType", "Select a secondary feature:", choices = NULL),
                                       actionButton("updateButton", "Update", icon = icon("sync"), class = "btn-primary")
-                                      # selectInput("userSelectedCell", "Choose a Cell Type:", choices = names(data()))
-                                      # selectInput("userSelectedCell", "Choose col2:", choices = NULL),  # Empty 
-                                      # selectInput("X.axis.cell", "Choose a Cell Type:", choices = NULL)  # Empty 
                                     ),
                                     box(
                                       title = "", # title = "Contour Plot",
@@ -1140,7 +1042,7 @@ server <- function(input, output, session) {
   userSelected <- reactiveVal(FALSE)
 
 observeEvent(input$userSelected_Status, {
-  userSelected(TRUE) # Set the flag when the user changes the selection
+  userSelected(TRUE) # Set flag when user changes selection
 }, ignoreInit = TRUE) # ignoreInit ensures this doesn't trigger at app startup
  
  #------
@@ -1159,11 +1061,8 @@ observeEvent(input$userSelected_Status, {
   update_clicked(TRUE)
 })
 
-
-
-
   #------------------------------------------------
-  # Reactive value to track if the dataset contains categorical columns
+  # Reactive value to track if dataset contains categorical columns
   has.Categorical.Columns <- reactiveVal(FALSE)
   cycles_resolved <- reactiveVal(TRUE)
   
@@ -1191,11 +1090,11 @@ observeEvent(input$userSelected_Status, {
                     style = "background-color: #58d68d; color: black; border: none; padding: 8px 18px; border-radius: 4px; margin: 5px;")
       ),
       easyClose = TRUE,
-      size = "m" # Adjust the modal size if needed
+      size = "m" #   
     ))
   }
 
-   # Force user back to the "WhiteList Check Acyclicity" tab if cycles are not resolved and the user tries to navigate away
+   # Force user back to "WhiteList Check Acyclicity" tab if cycles are not resolved and user tries to navigate away
   if (!cycles_resolved() && currentTab != "WhiteList_Check_acyclicity" && currentTab != "settings") {
     print("Unresolved cycles detected, redirecting back...")
     updateTabItems(session, "sidebarMenu", "WhiteList_Check_acyclicity")
@@ -1218,7 +1117,7 @@ observeEvent(input$userSelected_Status, {
                     style = "background-color: #e74c3c; color: white; border: none; padding: 8px 18px; border-radius: 4px; margin: 5px;")
       ),
       easyClose = TRUE,
-      size = "m" # Adjust the modal size if needed
+      size = "m" #   
     ))
   }
 
@@ -1226,50 +1125,7 @@ observeEvent(input$userSelected_Status, {
 
 })
 
-
-#------------------------------
-
-
-  # browser()
-  # # ----------------------------------
-  # # check_credentials directly on sqlite db
-  # res_auth <- secure_server(
-  #   check_credentials = check_credentials(
-  #     sqlite_path,
-  #     passphrase = key_get("R-shinymanager-key", "obiwankenobi")
-  #     # passphrase = "passphrase_wihtout_keyring"
-  #   )
-  # )
-  # 
-  # output$auth_output <- renderPrint({
-  #   reactiveValuesToList(res_auth)
-  # })
-  
-  
-  # # ----------------------------------
-  # call the server part
-  # check_credentials returns a function to authenticate users
-  # res_auth <- secure_server(
-  #   check_credentials = check_credentials(credentials)
-  # )
-  # 
-  # output$auth_output <- renderPrint({
-  #   reactiveValuesToList(res_auth)
-  # })
-  
-  # ----------------------------------
-  
-  # Now, the logic to run Final.DAG_network_plot_v6 function upon user's selection change.
-  # Assuming Final.DAG_network_plot_v6() is a function that generates your desired plot based on the provided parameters
-  # output$contour_plot <- renderPlot({
-  #   req(input$userSelected_Status, input$userSelected_key_feature, input$selectedCellType) # Ensure all inputs are selected
-  #   # Assuming you have a function to generate the plot based on these inputs
-  #   print("yahoo")
-  #   print(plot)
-  #   plot <- Final.DAG_network_plot_v6(data(), input$userSelected_Status, input$userSelected_key_feature, input$selectedCellType)
-  #   plot # This assumes your function returns a plot object
-  # })
-  #----------------------------------
+  #---------------------------------- Instruction
   observeEvent(input$show_nboot, {
     showModal(
       modalDialog(
@@ -1288,7 +1144,7 @@ observeEvent(input$userSelected_Status, {
       )
     )
   })
-  # ----------------------------------
+  # ---------------------------------- Instruction
   observeEvent(input$show_threshold_level, {
     showModal(
       modalDialog(
@@ -1309,7 +1165,7 @@ observeEvent(input$userSelected_Status, {
       )
     )
   })
-  # ----------------------------------
+  # ---------------------------------- Instruction
   observeEvent(input$show_dataFile, {
     showModal(
       modalDialog(
@@ -1338,7 +1194,7 @@ observeEvent(input$userSelected_Status, {
       )
     )
   })
-  # ----------------------------------
+  # ---------------------------------- Instruction
   observeEvent(input$show_BlackListFile, {
     showModal(
       modalDialog(
@@ -1360,27 +1216,27 @@ observeEvent(input$userSelected_Status, {
     )
   })
   # ----------------------------------
-  observeEvent(input$show_WhiteListFile, {
-    showModal(
-      modalDialog(
-        title = tags$span(
-          tags$i(class = "fas fa-info-circle", style = "color: white; padding-right: 10px;"), 
-          "WhiteList File  and format", 
-          style = "font-size: smaller; color: white; background-color: #3c8dbc; padding: 10px;"
-        ), 
-        size = "m",
-        tagList(
-          tags$p(
-            HTML("Upload the <code>WhiteList</code> file in CSV format."), 
-            br(),
-            HTML("The <code>WhiteList</code> operates as a user-defined input and is crucial in structuring and refining Bayesian networks, illustrated as Directed Acyclic Graphs (DAGs). It is designed to facilitate the inclusion of specific arcs (directed edges) in the proposed network, based on the strength of evidence supporting the existence of an arc, or alternatively, the <code>arc strength</code>. Arcs with strength below a predetermined threshold are incorporated in the <code>Whitelist</code>, ensuring that the evolving network structure is enriched with potential causal relationships that are substantiated by a robust degree of evidence. This approach optimizes the balance between model accuracy and complexity, allowing for a more nuanced and precise representation of causal relationships within the network while maintaining interpretability and coherence. In essence, the \"Whitelist\" serves as an inclusive filter, allowing arcs that meet or exceed certain criteria to shape and refine the network's structure, thereby enhancing the reliability and validity of the inferred causal relationships."),
-            style = "font-size: medium; padding: 5px;")
-        ),
-        easyClose = TRUE
-      )
-    )
-  })
-  # ----------------------------------
+  # observeEvent(input$show_WhiteListFile, {
+  #   showModal(
+  #     modalDialog(
+  #       title = tags$span(
+  #         tags$i(class = "fas fa-info-circle", style = "color: white; padding-right: 10px;"), 
+  #         "WhiteList File  and format", 
+  #         style = "font-size: smaller; color: white; background-color: #3c8dbc; padding: 10px;"
+  #       ), 
+  #       size = "m",
+  #       tagList(
+  #         tags$p(
+  #           HTML("Upload the <code>WhiteList</code> file in CSV format."), 
+  #           br(),
+  #           HTML("The <code>WhiteList</code> operates as a user-defined input and is crucial in structuring and refining Bayesian networks, illustrated as Directed Acyclic Graphs (DAGs). It is designed to facilitate the inclusion of specific arcs (directed edges) in the proposed network, based on the strength of evidence supporting the existence of an arc, or alternatively, the <code>arc strength</code>. Arcs with strength below a predetermined threshold are incorporated in the <code>Whitelist</code>, ensuring that the evolving network structure is enriched with potential causal relationships that are substantiated by a robust degree of evidence. This approach optimizes the balance between model accuracy and complexity, allowing for a more nuanced and precise representation of causal relationships within the network while maintaining interpretability and coherence. In essence, the \"Whitelist\" serves as an inclusive filter, allowing arcs that meet or exceed certain criteria to shape and refine the network's structure, thereby enhancing the reliability and validity of the inferred causal relationships."),
+  #           style = "font-size: medium; padding: 5px;")
+  #       ),
+  #       easyClose = TRUE
+  #     )
+  #   )
+  # })
+  # ---------------------------------- Instruction
   observeEvent(input$show_Dir_AlgoDescriptions, {
     showModal(
       modalDialog(
@@ -1410,7 +1266,7 @@ observeEvent(input$userSelected_Status, {
       )
     )
   })
-  # ----------------------------------
+  # ---------------------------------- Instruction
   observeEvent(input$show_UnDir_AlgoDescriptions, {
     showModal(
       modalDialog(
@@ -1439,7 +1295,7 @@ observeEvent(input$userSelected_Status, {
   # ----------------------------------
   
   datapath <- "./"
-  # Initialize reactive values
+  # reactive values
   data_uploaded <- reactiveVal(FALSE)
   rv <- reactiveValues()
   default_data_used <- reactiveVal(FALSE)  # to track if default data is used
@@ -1449,24 +1305,25 @@ observeEvent(input$userSelected_Status, {
   Black_List <- reactiveVal(NULL)
   White_List <- reactiveVal(NULL)
   
-  # Check if files are uploaded or not
+  #  files are uploaded or not?
   data_present <- reactiveVal(FALSE)
   Black_List_present <- reactiveVal(FALSE)
-  White_List_present <- reactiveVal(FALSE)
+  # White_List_present <- reactiveVal(FALSE)
   
   possible_whitelist_reactiveVal <- reactiveVal(NULL)
   final_white_list <- reactiveVal(NULL)
   
-  No_Cycle_plot <- reactiveVal(FALSE)  # to track if default data is used
+  No_Cycle_plot <- reactiveVal(FALSE)  
   
   
   plot_done <- reactiveVal(FALSE)
   # finished_running <- reactiveVal(FALSE)
-  Status_var <- reactiveVal(NULL)  
+  # Status_var <- reactiveVal(NULL)  
 
   plots_list = reactiveVal(NULL)
-
+  fBRCABN = reactiveVal(NULL)
   # -----------------------------------
+  
   # New observeEvent blocks:
       observeEvent(input$dataFile, {
         tryCatch({
@@ -1492,17 +1349,17 @@ observeEvent(input$userSelected_Status, {
         })
       })
       
-      observeEvent(input$WhiteListFile, {
-        tryCatch({
-          White_List.check <- input$WhiteListFile
-          if (!is.null(White_List.check$datapath) && file.exists(White_List.check$datapath)) {
-            White_List(read.csv(White_List.check$datapath))
-            print("White_List uploaded")
-          }
-        }, error = function(e) {
-          showNotification(paste("Error reading WhiteList File:", e$message), type = "error")
-        })
-      })
+      # observeEvent(input$WhiteListFile, {
+      #   tryCatch({
+      #     White_List.check <- input$WhiteListFile
+      #     if (!is.null(White_List.check$datapath) && file.exists(White_List.check$datapath)) {
+      #       White_List(read.csv(White_List.check$datapath))
+      #       print("White_List uploaded")
+      #     }
+      #   }, error = function(e) {
+      #     showNotification(paste("Error reading WhiteList File:", e$message), type = "error")
+      #   })
+      # })
       #---------
 
 
@@ -1540,19 +1397,26 @@ observeEvent(input$userSelected_Status, {
       # -------------------
       data_present <- reactive({ !is.null(input$dataFile) })
       Black_List_present <- reactive({ !is.null(input$BlackListFile) })
-      White_List_present <- reactive({ !is.null(input$WhiteListFile) })
+      # White_List_present <- reactive({ !is.null(input$WhiteListFile) })
       
-      # Check if data is uploaded and set data_uploaded reactive value
+      # data is uploaded and set data_uploaded reactive value?
 
-      print("hereeee")
+      #print("here 1 ")
+      cat("---------------", "\n")
       print(data_present())
+      cat("---------------", "\n")
       print(Black_List_present())
-      print(White_List_present())
+      cat("---------------", "\n")
+      # print(White_List_present())
 
-      if (data_present() & (Black_List_present() || White_List_present())) {
-        print("im here bruh")
+      # if (data_present()) {
+      if (data_present() & Black_List_present()) {
+      # if (data_present() & (Black_List_present() || White_List_present())) {
+        # print("im here 2")
         data_uploaded(TRUE)
+        cat("---------------", "\n")
         print(data_uploaded())
+        cat("---------------", "\n")
       } else {
         data_uploaded(FALSE)
       }
@@ -1560,11 +1424,14 @@ observeEvent(input$userSelected_Status, {
       
       
       # ------------------- main functionality 
-    print("im data uploaded")
-    print(data_uploaded())
+      cat("---------------", "\n")
+      print("uploaded data")
+      cat("---------------", "\n")
+      print(data_uploaded())
+      cat("---------------", "\n")
+      
       if (isTRUE(data_uploaded()) || isTRUE(default_data_used())) {
-
-
+        
          showModal(modalDialog(
           tags$div(
             style = "font-size:18px; color:#34495E; padding: 10px 20px; background-color: #EAECEE; border-radius: 5px; text-align: center; box-shadow: 0 4px 8px rgba(0,0,0,0.1);  margin: auto;",
@@ -1577,9 +1444,9 @@ observeEvent(input$userSelected_Status, {
               "Please wait, the initial plots and tables are getting generated..."
             )
           ),
-          footer = NULL,  # No footer as requested
-          easyClose = FALSE,  # Prevent closing by clicking outside the modal
-          size = "s"  # Small size, but the width is adjusted using custom styles
+          footer = NULL,  # No footer   
+          easyClose = FALSE,  # Prevent closing by clicking outside modal
+          size = "s"  # Small size, but width is adjusted using custom styles
         ))
 
         
@@ -1605,7 +1472,7 @@ observeEvent(input$userSelected_Status, {
         }
         
         corrcoef<- as.data.frame(data_process_result$corrcoef)
-        data<- as.data.frame(data_process_result$data)
+        # data<- as.data.frame(data_process_result$data)
         
         # -----------------
         renderStyledTable <- function(table_name, rownames = TRUE, download_version = c()) {
@@ -1621,7 +1488,7 @@ observeEvent(input$userSelected_Status, {
                 scrollX = TRUE, # Already present and set to TRUE.
                 scroller = TRUE,
                 deferRender = TRUE,
-                scrollY = '400px',  # adjust this value to change the visible height of the table.
+                scrollY = '400px',  # adjust this value to change visible height of table.
                 scrollCollapse = TRUE
               ),
               rownames = rownames,
@@ -1733,7 +1600,7 @@ observeEvent(input$userSelected_Status, {
                                                    input$algorithm_undirected,
                                                    Arcs.Cor_table.alg)
         # ---------------------
-        # For each column want to round, check if it's numeric. If it is, round it.
+        # For each column want to round, if it's numeric. round it
         cols_to_round <- grep("\\.strength|_strength", names(augmented_edge_list))
         
         for(col in cols_to_round){
@@ -1765,15 +1632,31 @@ observeEvent(input$userSelected_Status, {
         num.white_thresh <- temp.white_thresh.cols$num.white_thresh
         (num.white_thresh <- as.data.frame(num.white_thresh))
         
+        
+        # ------------------
+        data_val <- data()  # Get current data
+        data_val[] <- lapply(data_val, function(col) {
+          # Attempt to convert each column to numeric
+          numeric_col <- suppressWarnings(as.numeric(col))
+          if (!any(is.na(numeric_col))) {
+            return(numeric_col)  # Return converted column if no NA produced
+          } else {
+            return(col)  # Return original column if conversion fails
+          }
+        })
+        data(data_val)
+        # ------------------
+        
         calculate_loss_npar_table <- calculate_loss_npar_table (threshold, 
                                                                 temp_list_merge, 
-                                                                discretized_data, 
+                                                                discretized_data,
+                                                                data(),
                                                                 input$nboot, cl, Black_List()) 
         
         npar_merged  <- calculate_loss_npar_table$npar_merged
         L1_merged  <- calculate_loss_npar_table$L1_merged
         # ------------------
-        # For each column want to round, check if it's numeric. If it is, round it.
+        # For each column want to round, if it's numeric. If it is, round it.
         for (col in names(L1_merged)) {
           if (is.numeric(L1_merged[[col]])) {
             L1_merged[[col]] <- as.numeric(sprintf("%.2f", L1_merged[[col]]))
@@ -1793,7 +1676,7 @@ observeEvent(input$userSelected_Status, {
         
         BIC_merged_table <- calculate_bic (discretized_data, npar_merged, L1_merged, threshold) 
         
-        # For each column want to round, check if it's numeric. If it is, round it.
+        # For each column want to round, if it's numeric? round it.
         for (col in names(BIC_merged_table)) {
           if (is.numeric(BIC_merged_table[[col]])) {
             BIC_merged_table[[col]] <- as.numeric(sprintf("%.2f", BIC_merged_table[[col]]))
@@ -1815,7 +1698,7 @@ observeEvent(input$userSelected_Status, {
         
         possible_whitelist_reactiveVal(possible.white.list)
         print("possible whitelist:")
-        print(possible.white.list) # we printed data frame with 2 columns 
+        print(possible.white.list) # printed data frame with 2 columns 
         
         
         print("possible whitelist reactiveVal:")
@@ -1857,11 +1740,11 @@ observeEvent(input$userSelected_Status, {
                        nodesIdSelection = F)%>%
             visLayout(randomSeed = 123,
                       improvedLayout = TRUE)  %>%
-            visPhysics(solver = "forceAtlas2Based",  # The physics solver
-                       forceAtlas2Based = list(gravitationalConstant = -30,  # Adjust as needed
-                                               centralGravity = 0.005,  # Adjust as needed
-                                               springLength = 100,  # Adjust as needed
-                                               springConstant = 0.18))  # Adjust as needed
+            visPhysics(solver = "forceAtlas2Based",  # physics solver
+                       forceAtlas2Based = list(gravitationalConstant = -30,  #  
+                                               centralGravity = 0.005,  #  
+                                               springLength = 100,  #  
+                                               springConstant = 0.18))  #  
         })
         # -----------------------
         # plot_done(TRUE)
@@ -1869,7 +1752,7 @@ observeEvent(input$userSelected_Status, {
         observeEvent(plot_done(), {
             
             if (plot_done() == TRUE) {
-              removeModal()  # Ensure the "Resolving Cycles" modal is removed
+              removeModal()  # Ensure "Resolving Cycles" modal is removed
               content <- paste0(
                 "<div style='font-size:18px; color:#34495E; padding: 3px 5px; background-color: #EAECEE; border-bottom-left-radius: 5px; border-bottom-right-radius: 5px;'>",
                 "<p>",
@@ -1887,7 +1770,7 @@ observeEvent(input$userSelected_Status, {
                 text = content,
                 html = TRUE,
                 showConfirmButton = FALSE,
-                # confirmButtonColor = "#3498db" # This is a shade of blue.
+                # confirmButtonColor = "#3498db" # This is shade of blue.
                 # showConfirmButton = FALSE
               )
                 
@@ -1906,7 +1789,7 @@ observeEvent(input$userSelected_Status, {
             GoodNeighbors = GoodNeighbors[GoodNeighbors > v1]
             for(v2 in GoodNeighbors) {
               TempCyc = lapply(all_simple_paths(g, v2,v1, mode="out"), function(p) c(v1,p))
-              TempCyc = TempCyc[which(sapply(TempCyc, length) > 2)] # can check A->B and B->A as cycle: cycle length of two
+              TempCyc = TempCyc[which(sapply(TempCyc, length) > 2)] # check A->B and B->A as cycle: cycle length of two
               TempCyc = TempCyc[sapply(TempCyc, min) == sapply(TempCyc, `[`, 1)]
               Cycles  = c(Cycles, TempCyc)
             }
@@ -1921,7 +1804,7 @@ observeEvent(input$userSelected_Status, {
             final_white_list(possible_whitelist_reactiveVal())
             output$final_white_list <- renderStyledTable(final_white_list(), rownames = TRUE, download_version = c('csv', 'excel'))
             
-            # Convert igraph object to a visNetwork suitable format
+            # Convert igraph object to visNetwork suitable format
             vis_graph <- reactive({
               nodes_data <- data.frame(id = V(g())$name, label = V(g())$name)
               edges_data <- get.data.frame(g(), what = "edges")
@@ -1938,18 +1821,18 @@ observeEvent(input$userSelected_Status, {
                            nodesIdSelection = F)%>%
                 visLayout(randomSeed = 123,
                           improvedLayout = TRUE)  %>%
-                visPhysics(solver = "forceAtlas2Based",  # The physics solver
-                           forceAtlas2Based = list(gravitationalConstant = -50,  # Adjust as needed
-                                                   centralGravity = 0.005,  # Adjust as needed
-                                                   springLength = 100,  # Adjust as needed
-                                                   springConstant = 0.18))  # Adjust as needed
+                visPhysics(solver = "forceAtlas2Based",  # physics solver
+                           forceAtlas2Based = list(gravitationalConstant = -50,  #  
+                                                   centralGravity = 0.005,  #  
+                                                   springLength = 100,  #  
+                                                   springConstant = 0.18))  #  
             })
             
             # --------------------------------------
             # categorical_cols <- sapply(data(), function(x) { all(x %in% as.integer(x)) })
             
             observe({
-              req(fileInputState()) # Ensure a file is selected
+              req(fileInputState()) # Ensure file is selected
 
               categorical_cols <- sapply(data(), function(x) { all(x %in% as.integer(x)) })
               categorical_col_names <- names(categorical_cols[categorical_cols])
@@ -1966,13 +1849,13 @@ observeEvent(input$userSelected_Status, {
                 updateSelectInput(session, "userSelected_Status", choices = categorical_col_names, selected = categorical_col_names[1])
               } else {
                 has.Categorical.Columns(TRUE)
-                # If there are multiple categorical columns, let the user choose
+                # If there are multiple categorical columns, let user choose
                   current_status <- input$userSelected_Status
                   if (!is.null(current_status) && current_status %in% categorical_col_names) {
                   # Current selection is valid, do nothing
                   print("Current selection is already valid.")
                 } else {
-                  # Update because the current selection is not valid or not set
+                  # Update because current selection is not valid or not set
                   updateSelectInput(session, "userSelected_Status", choices = categorical_col_names)
                 }
               }
@@ -1980,24 +1863,24 @@ observeEvent(input$userSelected_Status, {
             
   
       observeEvent(input$userSelected_Status, {
-        # Fetch all column names except for the selected status
+        # Fetch all column names except for selected status
         valid_features <- setdiff(names(data()), input$userSelected_Status)
         
         # Determine valid choices for 'Choose Key Feature:' dropdown
         current_key_feature <- input$userSelected_key_feature
         
-        # If the current key feature is not in the list of valid features, update it to the first valid feature
+        # If current key feature is not in list of valid features, update it to first valid feature
         if (!current_key_feature %in% valid_features && length(valid_features) > 0) {
           current_key_feature <- valid_features[1]
         }
         
-        # Update 'Choose Key Feature:' dropdown with valid features and the currently selected key feature
+        # Update 'Choose Key Feature:' dropdown with valid features and currently selected key feature
         updateSelectInput(session, "userSelected_key_feature", choices = valid_features, selected = current_key_feature)
         
-        # Now update the 'Select a secondary feature:' dropdown based on the newly selected key feature
+        # Now update 'Select a secondary feature:' dropdown based on newly selected key feature
         valid_secondary_features <- setdiff(names(data()), c(input$userSelected_Status, current_key_feature))
         
-        # Preserve current secondary selection if it's still valid; otherwise, update to the first valid choice
+        # Preserve current secondary selection if it's still valid; otherwise, update to first valid choice
         current_secondary_selection <- input$selectedCellType
         if (!current_secondary_selection %in% valid_secondary_features && length(valid_secondary_features) > 0) {
           current_secondary_selection <- valid_secondary_features[1]
@@ -2010,31 +1893,31 @@ observeEvent(input$userSelected_Status, {
       print("Key feature changed to: ")
       print(input$userSelected_key_feature)
       
-      # Determine valid choices for the 'Select a secondary feature:' dropdown
+      # Determine valid choices for 'Select secondary feature:' dropdown
       valid_secondary_features <- setdiff(names(data()), c(input$userSelected_Status, input$userSelected_key_feature))
       print("Valid secondary features: ")
       print(valid_secondary_features)
       
-      # Check if the current selection of 'Select a secondary feature:' is still valid
+      # if current selection of 'Select secondary feature:' is still valid
       current_secondary_selection <- input$selectedCellType
       print("Current secondary selection: ")
       print(current_secondary_selection)
       
       if(!current_secondary_selection %in% valid_secondary_features) {
-        # If not valid, update to the first valid choice
+        # If not valid, update to first valid choice
         current_secondary_selection <- valid_secondary_features[1]
         updateSelectInput(session, "selectedCellType", choices = valid_secondary_features, selected = current_secondary_selection)
         print("Secondary selection updated to: ")
         print(current_secondary_selection)
       } else {
-        # If still valid, ensure the UI is updated to reflect the current state without changing the selection
+        # If still valid, ensure UI is updated to reflect current state without changing selection
         updateSelectInput(session, "selectedCellType", choices = valid_secondary_features, selected = current_secondary_selection)
         print("Secondary selection remains unchanged.")
       }
     })
 
             
-            print("I AM WHITE LISTE ")
+            print("WHITE LISTE ")
             print(final_white_list())
 
             # -----------------------------------
@@ -2042,79 +1925,24 @@ observeEvent(input$userSelected_Status, {
             # Ensure possible.white.list is not NULL
             # req(selectedStatus(), selectedKeyFeature(), selectedSecondaryFeature())
             req(final_white_list(), !contour_plot_initial() )
-
-            print("I CAME TO 1")
-
-            Final.DAG_network_plot_v6 <- Final.DAG_network_plot_v6 (augmented_edge_list,
-                                                                    possible_seed_arcs_filter,
-                                                                    data(), discretized_data,
-                                                                    final_white_list(),
-                                                                    Black_List(),
-                                                                    input$nboot, cl,
-                                                                    corrcoef,
-                                                                    input$userSelected_Status,
-                                                                    input$userSelected_key_feature)
             
-             plot_done(TRUE)
+             # plot_done(TRUE)
 
-            Alg.Count_arcs.strength.table <- Final.DAG_network_plot_v6$Alg.Count_arcs.strength.table
+            # Alg.Count_arcs.strength.table <- Final.DAG_network_plot_v6$Alg.Count_arcs.strength.table
             # plots_list <- Final.DAG_network_plot_v6$plots_list
-            plots_list(Final.DAG_network_plot_v6$plots_list)
+            # plots_list(Final.DAG_network_plot_v6$plots_list)
+            Contour_plot_userSelected_feature <- Contour_plot_userSelected_feature (data(), discretized_data,
+                                                                                    fBRCABN(),
+                                                                                    input$userSelected_Status,
+                                                                                    input$userSelected_key_feature)
             
-            
-
-            output$DAG.Plot <- renderPlot({
-              # Final.DAG_network_plot_v6$DAG.Plot
-              Final.DAG_network_plot_v6$plotFunction()
-            })
-            
-            
-            # -----------------
-            
-            arcs <- Final.DAG_network_plot_v6$arcs.BRCA
-            P_strength <- Final.DAG_network_plot_v6$P_strength
-            
-            arc_slopes.strength <- Final.DAG_network_plot_v6$arc_slopes.strength
-            
-            output$Diagnostic_plot <- renderPlot({
-              Diagnostic_plot.v3(num.white_thresh, num_arcs.All.thresh, Total.BIC.thresh, threshold)
-            })
-            # --------------
-            output$Plot.Algorithm.Count_arcs.strength <- renderPlot({
-              plot_Algorithm.Count_arcs.strength(Alg.Count_arcs.strength.table)
-            })
-            # DAG Network Plot
-            output$DAGNetworkPlot <- renderVisNetwork({
-              network <- Final.DAG_network_plot_v6$network
-            })
-            # arc_slopes_strength <- Final.DAG_network_plot_v6$arc_slopes.strength
-            final_DAG_detail <- Final.DAG_network_plot_v6$final_DAG_detail
-            
-            output$arc_slopes_strength <- renderStyledTable(final_DAG_detail, rownames = TRUE, download_version = c('csv', 'excel'))
-
-              # shinyjs::delay(500, {  # Delay in milliseconds
-              #   removeModal()  # Ensure the "Resolving Cycles" modal is removed
-                
-              #   shinyalert::shinyalert(
-              #     title = "Cycles Resolved",
-              #     text = "All the cycles were removed successfully.",
-              #     type = "success"
-              #   )
-
-              #  cycles_resolved(TRUE)  # Update the cycle resolution state
-
-              # })
-
-
-            }
+            # plots_list <- Final.DAG_network_plot_v6$plots_list
+            plots_list(Contour_plot_userSelected_feature)
+         }
             )} else{
               plot_done(TRUE)
               cycles_resolved(FALSE)
-
-
-
             }
-            
         })
         # --------------------------------------2
         # --------------------------------------
@@ -2133,7 +1961,7 @@ observeEvent(input$userSelected_Status, {
           } else {
             fluidRow(
               column(6,
-                     style = "position: relative; border-right: 2px solid rgba(0, 0, 0, 0.1);",  # Adding a right border to separate the columns
+                     style = "position: relative; border-right: 2px solid rgba(0, 0, 0, 0.1);",  # Adding a right border to separate columns
                      visNetworkOutput("initialPlot"),
                      style = "padding-top: 50px;",
                      tags$div(
@@ -2143,7 +1971,7 @@ observeEvent(input$userSelected_Status, {
                      )
               ),
               column(6,
-                     style = "padding-left: 20px;",  # Adjusts spacing to the left of the second column
+                     style = "padding-left: 20px;",  # Adjusts spacing to left of second column
                      tags$div(
                        style = "position: relative;",
                        visNetworkOutput("plot"), 
@@ -2172,7 +2000,7 @@ observeEvent(input$userSelected_Status, {
             #-------------
             print(paste("Number of cycles found:", length(cycles)))
             
-            # Check if cycles are empty and Define output$cycleMessage
+            # if cycles are empty and Define output$cycleMessage
             output$cycleMessage <- renderUI({
               if (length(cycles) == 0) {
                 No_Cycle_plot(TRUE)
@@ -2188,7 +2016,7 @@ observeEvent(input$userSelected_Status, {
             })
             # --------------------------------------------------
             ids <- paste0("cycle_", seq_along(cycles))
-            # Convert the cycles to arcs using the graph for vertex names
+            # Convert cycles to arcs using graph for vertex names
             cycle_arcs = lapply(cycles, cycle_to_arcs, g())
             
             ui_elems <- lapply(seq_along(cycle_arcs), function(i) {
@@ -2201,17 +2029,17 @@ observeEvent(input$userSelected_Status, {
             tagList(lapply(rows, function(row) fluidRow(row)))
             
           }, error = function(e) {
-            # Print the error message
+            # Print error message
             print(paste("Error in rendering checkbox UI:", e$message))
           })
         })
         # --------------------------------------------------new
         output$removeButtonUI <- renderUI({
-          # Check the length of cycles
+          # length of cycles?
           cycles <- FindCycles(g())
           
           if (length(cycles) > 0) {
-            # If cycles exist, render the button
+            # If cycles exist, render button
             div(
               style = "text-align: left;", # attention: change center to left
               actionButton(inputId = "remove", 
@@ -2226,7 +2054,7 @@ observeEvent(input$userSelected_Status, {
         # --------------------------------------2
         observeEvent(input$remove, {
 
-          # Show the modal indicating the cycle resolution process is starting
+          # Show modal indicating cycle resolution process is starting
           showModal(modalDialog(
             tags$div(
               style = "font-size:18px; color:#34495E; padding: 20px; background-color: #EAECEE; border-radius: 5px; text-align: center;",
@@ -2239,14 +2067,14 @@ observeEvent(input$userSelected_Status, {
                 "Please wait, we're resolving the cycles..."
               )
             ),
-            footer = NULL, # No footer to prevent user from closing the modal
-            easyClose = FALSE, # Prevent closing by clicking outside the modal
+            footer = NULL, # No footer to prevent user from closing modal
+            easyClose = FALSE, # Prevent closing by clicking outside modal
             size = "s"
           ))
           
           cycles <- FindCycles(g())
           # ----------------
-          # Check if there are no cycles
+          # if no cycles
           if (length(cycles) == 0) {
             No_Cycle_plot(TRUE)
             print("If condition:possible_whitelist_reactiveVal:")
@@ -2285,7 +2113,7 @@ observeEvent(input$userSelected_Status, {
             
             output$final_white_list <- renderStyledTable(final_white_list(), rownames = TRUE, download_version = c('csv', 'excel'))
 
-            # Convert igraph object to a visNetwork suitable format
+            # Convert igraph object to visNetwork suitable format
             vis_graph <- reactive({
               nodes_data <- data.frame(id = V(g_final)$name, label = V(g_final)$name)
               edges_data <- get.data.frame(g_final, what = "edges")
@@ -2305,44 +2133,16 @@ observeEvent(input$userSelected_Status, {
                            nodesIdSelection = F)%>%
                 visLayout(randomSeed = 123,
                           improvedLayout = TRUE)  %>%
-                visPhysics(solver = "forceAtlas2Based",  # The physics solver
-                           forceAtlas2Based = list(gravitationalConstant = -50,  # Adjust as needed
-                                                   centralGravity = 0.005,  # Adjust as needed
-                                                   springLength = 100,  # Adjust as needed
-                                                   springConstant = 0.18))  # Adjust as needed
+                visPhysics(solver = "forceAtlas2Based",  # physics solver
+                           forceAtlas2Based = list(gravitationalConstant = -50,  #  
+                                                   centralGravity = 0.005,  #  
+                                                   springLength = 100,  #  
+                                                   springConstant = 0.18))  # 
             })
           }
             # ----------------------------------
-            
-          #   output$plot <- renderVisNetwork({
-          #     visNetwork(nodes = vis_graph()$nodes, edges = vis_graph()$edges) %>%
-          #       visNodes(shape = "circle", color = list(background = "#32a89e")) %>%
-          #       visEdges(arrows = "to") %>%
-          #       visOptions(highlightNearest = list(enabled = TRUE, hover = TRUE))%>%
-          #       visLayout(randomSeed = 123,
-          #                 improvedLayout = TRUE)  %>%
-          #       visPhysics(solver = "forceAtlas2Based",  # The physics solver
-          #                  forceAtlas2Based = list(gravitationalConstant = -50,  # Adjust as needed
-          #                                          centralGravity = 0.005,  # Adjust as needed
-          #                                          springLength = 100,  # Adjust as needed
-          #                                          springConstant = 0.18))  # Adjust as needed
-          #   })
-          # }
-          # ----------------------------------
-          
-          # cycles_resolved(TRUE)
-          # # Cycle resolution process is completed, remove the modal
-          # removeModal()
-          
-          # # Show another modal or a notification that cycles have been resolved
-          #  shinyalert::shinyalert(
-          #   title = "Cycles Resolved",
-          #   text = "All  the cycles were removed successfully",
-          #   type = "success"
-          # )
-
           shinyjs::delay(1000, {  # Delay in milliseconds
-                removeModal()  # Ensure the "Resolving Cycles" modal is removed
+                removeModal()  # Ensure "Resolving Cycles" modal is removed
                 
                 shinyalert::shinyalert(
                   title = "Cycles Resolved",
@@ -2350,12 +2150,12 @@ observeEvent(input$userSelected_Status, {
                   type = "success"
                 )
 
-               cycles_resolved(TRUE)  # Update the cycle resolution state
+               cycles_resolved(TRUE)  # Update cycle resolution state
 
               })
 
-          # Adding the other graphs after the cycles are resolved
-          print("I CAME TO 5")
+          # Adding other graphs after cycles are resolved
+          #print("I CAME TO 5")
 
             Final.DAG_network_plot_v6 <- Final.DAG_network_plot_v6 (augmented_edge_list,
                                                                     possible_seed_arcs_filter,
@@ -2363,15 +2163,24 @@ observeEvent(input$userSelected_Status, {
                                                                     final_white_list(),
                                                                     Black_List(),
                                                                     input$nboot, cl,
-                                                                    corrcoef,
-                                                                    input$userSelected_Status,
-                                                                    input$userSelected_key_feature)
+                                                                    corrcoef)
             
-             plot_done(TRUE)
+             # plot_done(TRUE)
 
             Alg.Count_arcs.strength.table <- Final.DAG_network_plot_v6$Alg.Count_arcs.strength.table
             # plots_list <- Final.DAG_network_plot_v6$plots_list
-            plots_list(Final.DAG_network_plot_v6$plots_list)
+            # plots_list(Final.DAG_network_plot_v6$plots_list)
+            
+            
+            fBRCABN(Final.DAG_network_plot_v6$fBRCABN)
+            
+            Contour_plot_userSelected_feature <- Contour_plot_userSelected_feature (data(), discretized_data,
+                                                                                    fBRCABN(),
+                                                                                    input$userSelected_Status,
+                                                                                    input$userSelected_key_feature)
+            
+            # plots_list <- Final.DAG_network_plot_v6$plots_list
+            plots_list(Contour_plot_userSelected_feature)
             
             
 
@@ -2405,15 +2214,12 @@ observeEvent(input$userSelected_Status, {
             output$arc_slopes_strength <- renderStyledTable(final_DAG_detail, rownames = TRUE, download_version = c('csv', 'excel'))
 
           
-
           })
           # --------------------------------------
           
           # Detect categorical columns and set up Status options
-  
-
             observe({
-              req(fileInputState()) # Ensure a file is selected
+              req(fileInputState()) # Ensure file is selected
 
 
               categorical_cols <- sapply(data(), function(x) { all(x %in% as.integer(x)) })
@@ -2432,13 +2238,13 @@ observeEvent(input$userSelected_Status, {
                 updateSelectInput(session, "userSelected_Status", choices = categorical_col_names, selected = categorical_col_names[1])
               } else {
                 has.Categorical.Columns(TRUE)
-                # If there are multiple categorical columns, let the user choose
+                # If there are multiple categorical columns, let user choose
                   current_status <- input$userSelected_Status
                   if (!is.null(current_status) && current_status %in% categorical_col_names) {
                   # Current selection is valid, do nothing
                   print("Current selection is already valid.")
                 } else {
-                  # Update because the current selection is not valid or not set
+                  # Update because current selection is not valid or not set
                   updateSelectInput(session, "userSelected_Status", choices = categorical_col_names)
                 }
               }
@@ -2447,7 +2253,6 @@ observeEvent(input$userSelected_Status, {
          
           
           # -----------------------------------
-#START HERE
           # Reactive expression for network plot
           observe({
             currentTab <- input$sidebarMenu
@@ -2469,61 +2274,67 @@ observeEvent(input$userSelected_Status, {
                       "Please wait, we're generating the plot.."
                     )
                   ),
-                  footer = NULL,  # No footer as requested
-                  easyClose = FALSE,  # Prevent closing by clicking outside the modal
-                  size = "s"  # Small size, but the width is adjusted using custom styles
+                  footer = NULL,  # No footer 
+                  easyClose = FALSE,  # Prevent closing by clicking outside modal
+                  size = "s"  # Small size, but width is adjusted using custom styles
                 ))
               }
 
-            Final.DAG_network_plot_v6 <- Final.DAG_network_plot_v6 (augmented_edge_list,
-                                                                    possible_seed_arcs_filter,
-                                                                    data(), discretized_data,
-                                                                    final_white_list(),
-                                                                    Black_List(),
-                                                                    input$nboot, cl,
-                                                                    corrcoef,
-                                                                    input$userSelected_Status,
-                                                                    input$userSelected_key_feature)
-            
-        
-         
-          Alg.Count_arcs.strength.table <- Final.DAG_network_plot_v6$Alg.Count_arcs.strength.table
+          #   Final.DAG_network_plot_v6 <- Final.DAG_network_plot_v6 (augmented_edge_list,
+          #                                                           possible_seed_arcs_filter,
+          #                                                           data(), discretized_data,
+          #                                                           final_white_list(),
+          #                                                           Black_List(),
+          #                                                           input$nboot, cl,
+          #                                                           corrcoef,
+          #                                                           input$userSelected_Status,
+          #                                                           input$userSelected_key_feature)
+          #   
+          # 
+          # 
+          # Alg.Count_arcs.strength.table <- Final.DAG_network_plot_v6$Alg.Count_arcs.strength.table
           
-          plots_list(Final.DAG_network_plot_v6$plots_list)
           # plots_list(Final.DAG_network_plot_v6$plots_list)
+          # plots_list(Final.DAG_network_plot_v6$plots_list)
+          Contour_plot_userSelected_feature <- Contour_plot_userSelected_feature (data(), discretized_data,
+                                                                                  fBRCABN(),
+                                                                                  input$userSelected_Status,
+                                                                                  input$userSelected_key_feature)
+          
+          # plots_list <- Final.DAG_network_plot_v6$plots_list
+          plots_list(Contour_plot_userSelected_feature)
+          
           # DAG.Plot <- Final.DAG_network_plot_v6$DAG.Plot
 
-          output$DAG.Plot <- renderPlot({
-            # Final.DAG_network_plot_v6$DAG.Plot
-            Final.DAG_network_plot_v6$plotFunction()
-          })
+          # output$DAG.Plot <- renderPlot({
+          #   # Final.DAG_network_plot_v6$DAG.Plot
+          #   Final.DAG_network_plot_v6$plotFunction()
+          # })
           
-
           # -----------------
-          arcs <- Final.DAG_network_plot_v6$arcs.BRCA
-          P_strength <- Final.DAG_network_plot_v6$P_strength
-          
-          arc_slopes.strength <- Final.DAG_network_plot_v6$arc_slopes.strength
-          
-          output$Diagnostic_plot <- renderPlot({
-            Diagnostic_plot.v3(num.white_thresh, num_arcs.All.thresh, Total.BIC.thresh, threshold)
-            
-          })
-          
-          output$Plot.Algorithm.Count_arcs.strength <- renderPlot({
-            plot_Algorithm.Count_arcs.strength(Alg.Count_arcs.strength.table)
-          })
-
-          # DAG Network Plot
-          output$DAGNetworkPlot <- renderVisNetwork({
-            network <- Final.DAG_network_plot_v6$network
-          })
-          
-          # arc_slopes_strength <- Final.DAG_network_plot_v6$arc_slopes.strength
-          final_DAG_detail <- Final.DAG_network_plot_v6$final_DAG_detail
-          
-          output$arc_slopes_strength <- renderStyledTable(final_DAG_detail, rownames = TRUE, download_version = c('csv', 'excel'))
-
+          # arcs <- Final.DAG_network_plot_v6$arcs.BRCA
+          # P_strength <- Final.DAG_network_plot_v6$P_strength
+          # 
+          # arc_slopes.strength <- Final.DAG_network_plot_v6$arc_slopes.strength
+          # 
+          # output$Diagnostic_plot <- renderPlot({
+          #   Diagnostic_plot.v3(num.white_thresh, num_arcs.All.thresh, Total.BIC.thresh, threshold)
+          #   
+          # })
+          # 
+          # output$Plot.Algorithm.Count_arcs.strength <- renderPlot({
+          #   plot_Algorithm.Count_arcs.strength(Alg.Count_arcs.strength.table)
+          # })
+          # 
+          # # DAG Network Plot
+          # output$DAGNetworkPlot <- renderVisNetwork({
+          #   network <- Final.DAG_network_plot_v6$network
+          # })
+          # 
+          # # arc_slopes_strength <- Final.DAG_network_plot_v6$arc_slopes.strength
+          # final_DAG_detail <- Final.DAG_network_plot_v6$final_DAG_detail
+          # 
+          # output$arc_slopes_strength <- renderStyledTable(final_DAG_detail, rownames = TRUE, download_version = c('csv', 'excel'))
 
 
   print("I got in the contour plot!!")
@@ -2533,20 +2344,20 @@ observeEvent(input$userSelected_Status, {
   }else{
     selectedCellType <- selectedInputs$secondaryFeature
   }
-  print("THIS IS SELECTED CELL TYPE")
+  #print("THIS IS SELECTED CELL TYPE")
   print(selectedCellType)
 
  
 
 
   output$contour_plot <- renderPlot({
-  # Ensure the user has selected a key feature and plots_list is not null
+  # Ensure user has selected  key feature and plots_list is not null
   req(selectedCellType, !is.null(plots_list()))
   
   
-  print("I got in the contour plot!! 2")
+  print("I got in contour plot!! 2")
 
-  # Access the user-selected key feature
+  # Access user-selected key feature
 
   print("I got in the contour plot!! 3")
 
@@ -2558,10 +2369,6 @@ observeEvent(input$userSelected_Status, {
   print("I got in the contour plot!! 4")
 
 
-  # Debug: Check if the key feature exists in plots_list
-
-
-
   if(selectedCellType %in% names(plots_list())) {
     cat("selected cell type found in plots_list\n")
   } else {
@@ -2569,7 +2376,7 @@ observeEvent(input$userSelected_Status, {
   }
 
   # Assuming plots_list contains ggplot objects or similar
-  # Render the plot corresponding to the selected key feature
+  # Render plot corresponding to selected key feature
   plot_to_render <- plots_list()[[selectedCellType]]
 
 
@@ -2591,7 +2398,6 @@ observeEvent(input$userSelected_Status, {
      update_clicked(FALSE)
   }
 })}
-
 
 })
 
@@ -2674,8 +2480,8 @@ observeEvent(input$userSelected_Status, {
     Black_List_default <- read.csv(paste0(datapath, "BlackList.csv"), header = TRUE)
     Black_List(Black_List_default)  # Set new value for data
     
-    White_List_default <- read.csv(paste0(datapath, "WhiteList.csv"), header = TRUE)
-    White_List(White_List_default)  # Set new value for data
+    # White_List_default <- read.csv(paste0(datapath, "WhiteList.csv"), header = TRUE)
+    # White_List(White_List_default)  # Set new value for data
     
     default_data_used(TRUE)
     
@@ -2691,7 +2497,7 @@ observeEvent(input$userSelected_Status, {
             tags$span(style = "font-weight: bold;", "Notification: ")
           ), 
           "Default files have been successfully loaded.", tags$br(), 
-          "Please hit the ", 
+          "Please hit ", 
           tags$span(
             style = "font-weight: bold; color:#2980B9;", 
             "Run Discovery"
@@ -2703,55 +2509,24 @@ observeEvent(input$userSelected_Status, {
           )
         )
       ),
-      # ---------------------
-      # tags$div(
-      #   style = "font-size:18px; color:#34495E; padding: 10px 20px; background-color: #EAECEE; border-bottom-left-radius: 5px; border-bottom-right-radius: 5px;",
-      #   tags$p(
-      #     tags$span(
-      #       style = "color: #d68910 ;", 
-      #       icon("exclamation-triangle", style = "margin-right: 6px; color: #d68910;"), 
-      #       tags$span(style = "font-weight: bold;", "Notification: ")
-      #     ), 
-      #     "Default files have been successfully loaded.", tags$br(), "Please hit the ", 
-      #     tags$span(tags$span(style = "font-weight: bold; color:#2980B9;", "Run Discovery"), icon("fas fa-hand-pointer fa-rotate-180", style="margin-right: 4px;")), 
-      #     " to proceed."      
-      #   )
-      # ),
       # ----------------
       easyClose = TRUE,
       footer = NULL
     ))
   })
-  # ------------------------------- 
-  # observe({
-  # req(data())
-  # # Detect categorical columns
-  # categorical_cols <- sapply(data(), function(x) { all(x %in% as.integer(x)) })
-  # categorical_col_names <- names(categorical_cols[categorical_cols])
-  # print("im in 3")
-  # print(categorical_col_names)
-  # print(length(categorical_col_names))
-
-  # if (length(categorical_col_names) == 1) {
-  #   # If there's exactly one categorical column, use it as Status
-  #   updateSelectInput(session, "userSelected_Status", choices = categorical_col_names, selected = categorical_col_names[1])
-  # } else {
-  #   # If there are multiple categorical columns, let the user choose
-  #   updateSelectInput(session, "userSelected_Status", choices = categorical_col_names)
-  # }
+  # -------------------------------
   observe({
-  req(data()) # Ensure a file is selected
+  req(data()) # Ensure file is selected
 
   # Current selection
   current_status <- input$userSelected_Status
-
 
   categorical_cols <- sapply(data(), function(x) { all(x %in% as.integer(x)) })
   categorical_col_names <- names(categorical_cols[categorical_cols])
   print(categorical_col_names)
   print(length(categorical_col_names))
   
-  print("hi im current status")
+  print("current status")
   print(current_status)
 
   userChangedStatus <- isTRUE(userSelected()) 
@@ -2768,13 +2543,13 @@ observeEvent(input$userSelected_Status, {
   } else {
       has.Categorical.Columns(TRUE)
 
-      # If there are multiple categorical columns, let the user choose
+      # If there are multiple categorical columns, let user choose
         current_status <- input$userSelected_Status
         if (!is.null(current_status) && current_status %in% categorical_col_names) {
         # Current selection is valid, do nothing
         print("Current selection is already valid.")
       } else {
-        # Update because the current selection is not valid or not set
+        # Update because current selection is not valid or not set
         updateSelectInput(session, "userSelected_Status", choices = categorical_col_names)
       }
     }
@@ -2797,64 +2572,7 @@ observeEvent(input$userSelected_Status, {
   }
   updateSelectInput(session, "selectedCellType", choices = valid_secondary_features, selected = current_secondary_selection)
 })
-
   
-  
-#   observe({
-
-#   req(final_white_list())
-
-#   print("I got in the contour plot!!")
-#   output$contour_plot <- renderPlot({
-#   # Ensure the user has selected a key feature and plots_list is not null
-#   req(input$selectedCellType, !is.null(plots_list()))
-
-#   print("I got in the contour plot!! 2")
-
-#   # Access the user-selected key feature
-#   selectedCellType <- input$selectedCellType
-
-#   print("I got in the contour plot!! 3")
-
-
-#   # Debug: Print the selected key feature
-#   cat("Selected Cell type:", selectedCellType, "\n")
-#   cat("Selected scondary type:", input$userSelected_key_feature, "\n")
-
-
-#   print("plotslist")
-#   print( names(plots_list()))
-
-#   print("I got in the contour plot!! 4")
-
-
-#   # Debug: Check if the key feature exists in plots_list
-#   if(selectedCellType %in% names(plots_list())) {
-#     cat("selected cell type found in plots_list\n")
-#   } else {
-#     cat("selected cell type NOT found in plots_list\n")
-#   }
-
-#   # Assuming plots_list contains ggplot objects or similar
-#   # Render the plot corresponding to the selected key feature
-#   plot_to_render <- plots_list()[[selectedCellType]]
-#   if(!is.null(plot_to_render)) {
-#     print(plot_to_render)
-#   } else {
-#     cat("Plot for selected key feature is NULL\n")
-#   }
-
-#   shinyalert::shinyalert(
-#     title = "Process Completed",
-#     text = "The analysis based on your selections has been completed successfully.",
-#     type = "success"
-#   )
-# })
-
-#   })
-
-
-
   # -------------------------------
   observeEvent(input$close, {
     # Close modal if "Acknowledge" clicked
@@ -2862,29 +2580,5 @@ observeEvent(input$userSelected_Status, {
   })
   # --------------------------
 }
-# -------------------------------
-# finished_running(TRUE)
-# 
-# observeEvent(finished_running(), {
-#   if (finished_running() == TRUE) {
-#     content <- paste0(
-#       "<div style='font-size:18px; color:#34495E; padding: 5px 10px; background-color: #EAECEE; border-bottom-left-radius: 5px; border-bottom-right-radius: 5px;'>",
-#       "<p>",
-#       "<span style='color: #FF0000;'>",
-#       "<i class='fa fa-exclamation-triangle' style='margin-right: 6px; color: #FF0000;'></i>",
-#       "<span style='font-weight: bold;'>Task Completed </span>",
-#       "</span>",
-#       "<br><br>",
-#       "The app has finished running!",
-#       "</p>",
-#       "</div>"
-#     )
-#     shinyalert::shinyalert(
-#       # title = "Proceed to Further Analysis",
-#       text = content,
-#       type = "success"
-#     )
-#   }
-# })
 # -------------------------------
 shinyApp(ui, server)

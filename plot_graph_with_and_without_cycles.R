@@ -1,7 +1,9 @@
-library(igraph)
 
-# ---------------------------------------------
 plot_graph_with_and_without_cycles <- function(possible.white.list) {
+  
+  print("Starting 'plot_graph_with_and_without_cycles' inputs:")
+  
+  # library(igraph)
   g.initial <- graph_from_data_frame(d = possible.white.list, directed = TRUE)
   shared_layout <- layout_nicely(g.initial)
   
@@ -9,7 +11,7 @@ plot_graph_with_and_without_cycles <- function(possible.white.list) {
     plot(g, layout=layout, main=main, vertex.size=30, vertex.label.cex=1.5, edge.arrow.size=0.71, vertex.color=color)
   }
   
-  # Plot and capture the first plot
+  # capture first plot
   plot_graph_from_table(g.initial, "White list before Cycle check", "lightblue", shared_layout)
   plot_before <- recordPlot()
   
@@ -31,7 +33,7 @@ plot_graph_with_and_without_cycles <- function(possible.white.list) {
   # Remove cycles
   g.final <- remove_cycles(g.initial)
   
-  # Plot and capture second plot
+  # Plot &  capture second plot
   plot_graph_from_table(g.final, "Final White list after Cycle check", "lightcoral", shared_layout)
   plot_after <- recordPlot()
   
@@ -42,4 +44,3 @@ plot_graph_with_and_without_cycles <- function(possible.white.list) {
   
   return(list(final_white_list = final_white_list, plot_before = plot_before, plot_after = plot_after))
 }
-# ---------------------------------------------

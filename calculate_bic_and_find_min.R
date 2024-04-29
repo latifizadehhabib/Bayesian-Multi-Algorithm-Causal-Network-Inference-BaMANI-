@@ -1,5 +1,13 @@
-# Calculating BIC and find min BIC
+# Calculating BIC & find min BIC
 calculate_bic_and_find_min <- function(discretized_data, npar_merged, L1_merged, threshold, parents_list_merged) {
+  
+  
+  
+  cat("------------------------------", "\n")
+  print("Starting 'calculate_bic_and_find_min' inputs:")
+  cat("------------------------------", "\n")
+  
+  
   source("calculate_bic.R")
   source("find_min_bic.Parent_whitelist_acyclic.R")
   

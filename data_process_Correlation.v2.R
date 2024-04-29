@@ -1,31 +1,32 @@
 data_process_Correlation.v2 <- function(data) {
   
-  # remove first column (row column)
-  # data <- data[, -1]
+
+  cat("------------------------------", "\n")
+  print("Starting 'data_process_Correlation.v2' inputs:")
+  cat("------------------------------", "\n")
   
   # convert all columns to numeric
   data[] <- lapply(data, as.numeric)
-
-  # data[, sapply(data, is.numeric) == FALSE] <- lapply(data[, sapply(data, is.numeric) == FALSE], as.numeric)
-  
   print(class(data))
   
   
   data[] <- lapply(data, function(col) {
-    if (is.character(col)) {
+    # if (is.character(col)) {
+    if (is.character(col) || is.integer(col)) {
       numeric_col <- suppressWarnings(as.numeric(col))
-      if (!any(is.na(numeric_col))) return(numeric_col)
+      if (!any(is.na(numeric_col))) {
+        return(numeric_col)
+      } else {
+        return(col)  # Return original column if conversion results in any NA
+      }
     }
     return(col)
   })
   
-  data <- as.data.frame(data)
   
-  # --------
+   data <- as.data.frame(data)
   
-  # data <- as.data.frame(data)
-  
-  # Identify constant columns and store them separately
+  # Identify constant columns & store them separately
   constant_columns <- sapply(data, function(x) length(unique(x)) == 1)
   constant_data <- data[, constant_columns, drop = FALSE]
   
@@ -48,13 +49,9 @@ data_process_Correlation.v2 <- function(data) {
     # To maintain original order
     discretized_data <- discretized_data[, names(data)]
   }
-  
-  # discretized_data now contains discretized dataset, including constant columns in their original locations
-  # view(discretized_data)
-  
   # -----------------------------
   
-  # Identify constant columns and store them separately
+  # Identify constant columns & store them separately
   constant_columns.cor <- sapply(discretized_data, function(x) length(unique(x)) == 1)
   constant_data.cor <- discretized_data[, constant_columns.cor, drop = FALSE]
   
@@ -64,8 +61,6 @@ data_process_Correlation.v2 <- function(data) {
   
   ddata <- as.data.frame(lapply(discretized_data_no_constant, function(x) (as.numeric(x) - 1)/max(as.numeric(x) -1)))
   
-  # view(ddata)
-  
   # Reinsert constant columns back into their original positions
   for (col_name in names(constant_data.cor)) {
     ddata <- cbind(ddata, constant_data.cor[col_name])
@@ -73,19 +68,14 @@ data_process_Correlation.v2 <- function(data) {
     ddata <- ddata[, names(data)]
   }
   
-  # discretized_data now contains discretized dataset, including constant columns in their original locations
-  # view(ddata)
-  
-  
-  cat("*************", "\n")
+  cat("------------------------------", "\n")
   cat(sprintf("Data characteristics"), "\n")
-  cat("*************", "\n")
+  cat("------------------------------", "\n")
   str(ddata)
-  cat("*************", "\n")
-  
+  cat("------------------------------", "\n")
+
   # ------------------
-  # Assume 'data' is dataframe
-  # First, identify constant columns
+  # 'data' is dataframe & identify constant columns
   constant_columns <- sapply(ddata, function(x) length(unique(na.omit(x))) == 1)
   
   # Compute correlation matrix for non-constant columns
@@ -100,17 +90,24 @@ data_process_Correlation.v2 <- function(data) {
   non_constant_colnames <- colnames(non_constant_data)
   corrcoef[non_constant_colnames, non_constant_colnames] <- corr_matrix_non_constant
   
-  # Now, corrcoef is correlation matrix with zeros for constant columns
+  # Now corrcoef is correlation matrix with zeros for constant columns
   # Optionally, set diagonal for constant columns to 1
   diag(corrcoef) <- 1
   
-  # corrcoef <- as.data.frame(corrcoef)
-  # class(corrcoef)
-  
   #  correlation matrix
   # View(corrcoef)
+  
+  cat("------------------------------", "\n")
+  cat(sprintf("characteristics of 'corrcoef':"), "\n")
+  cat("------------------------------", "\n")
   str(corrcoef)
+  cat("------------------------------", "\n")
+  cat(sprintf("class of 'corrcoef':"), "\n")
+  cat("------------------------------", "\n")
   print(class(corrcoef))
+  cat("------------------------------", "\n")
+  cat(sprintf("Matrix of 'corrcoef':"), "\n")
+  cat("------------------------------", "\n")
   print(corrcoef)
   
   

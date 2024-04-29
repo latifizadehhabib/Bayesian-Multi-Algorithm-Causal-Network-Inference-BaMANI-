@@ -1,9 +1,59 @@
-library(igraph)
+calculate_loss_npar_table <- function(threshold, temp_list_merge, discretized_data, data, nboot, cl, Black_List) {
+  
+  
+  # library(igraph)
+  
+  cat("------------------------------", "\n")
+  print("Starting 'calculate_loss_npar_table' inputs:")
 
-calculate_loss_npar_table <- function(threshold, temp_list_merge, discretized_data, nboot, cl, Black_List) {
+  cat("------------------------------", "\n")
+  cat(sprintf("threshold:"), "\n")
+  cat("------------------------------", "\n")
+  print(threshold)
+  cat("------------------------------", "\n")
+  
+  cat("------------------------------", "\n")
+  cat(sprintf("class of data:"), "\n")
+  cat("------------------------------", "\n")
+  print(class(data))
+  cat("------------------------------", "\n")
+  
+  cat("------------------------------", "\n")
+  cat(sprintf("Data characteristics"), "\n")
+  cat("------------------------------", "\n")
+  str(data)
+  cat("------------------------------", "\n")
   
   
-  print("IM IN THE FUNCTION: ")
+  cat("------------------------------", "\n")
+  cat(sprintf("discretized_data characteristics"), "\n")
+  cat("------------------------------", "\n")
+  str(discretized_data)
+  cat("------------------------------", "\n")
+
+  # ------------------
+  # data[] <- lapply(data, as.numeric)
+  # print(class(data))
+  # 
+  # 
+  # data[] <- lapply(data, function(col) {
+  #   # if (is.character(col)) {
+  #   if (is.character(col) || is.integer(col)) {
+  #     numeric_col <- suppressWarnings(as.numeric(col))
+  #     if (!any(is.na(numeric_col))) {
+  #       return(numeric_col)
+  #     } else {
+  #       return(col)  # Return original column if conversion results in any NA
+  #     }
+  #   }
+  #   return(col)
+  # })
+  # 
+  # 
+  # data <- as.data.frame(data)
+  # # print("IM IN FUNCTION: ")
+  # ------------------
+  
   npar_list <- list()
   L1_list <- list()
   parents_list = list()
@@ -21,17 +71,17 @@ calculate_loss_npar_table <- function(threshold, temp_list_merge, discretized_da
   parents_list_name <- c()
   
   #------------------------------------------------
-# Function to detect and break cycles in a graph represented by a data frame of edges
+# Function to detect and break cycles in graph represented by data frame of edges
 break_cycles_in_df_edges <- function(df_edges) {
   g <- graph_from_data_frame(df_edges, directed = TRUE)
   
-  # Check for cycles using the girth function
-  # A girth of 0 indicates an acyclic graph
+  # Check for cycles using girth function
+  # girth of 0 indicates an acyclic graph
   while(girth(g)$girth != 0) {
-    # Since igraph doesn't provide a direct way to identify the specific cycle,
-    # you might need a heuristic or method to decide which edge to remove.
-    # For demonstration, let's remove a random edge from the graph.
-    # In practice, you might want to remove edges based on specific criteria.
+    # Since igraph doesn't provide direct way to identify specific cycle,
+    # might need heuristic or method to decide which edge to remove.
+    # For demonstration, let's remove random edge from graph.
+    # In practice, might want to remove edges based on specific criteria.
     
     edges <- E(g)
     if(length(edges) > 0) {
@@ -41,11 +91,11 @@ break_cycles_in_df_edges <- function(df_edges) {
     }
   }
   
-  # Return the modified graph as an edge data frame
+  # Return modified graph as an edge data frame
   return(get.data.frame(g, what="edges"))
 }
   
-  #-------------------------------------------- new
+  #-------------------------------------------- 
   for (i in 1: length(threshold)) {
     
     # temp.white <- temp_list_merge[[i+1]]
@@ -57,45 +107,10 @@ break_cycles_in_df_edges <- function(df_edges) {
       # Inserted cycle detection and breaking logic here
     temp_white_thresh <- break_cycles_in_df_edges(temp_white_thresh)
 
-  print("hi there")
-  print(temp_white_thresh)
-    
-    # --------------------------
-#     has_cycles <- function(df_arcs) {
-#   g <- graph_from_data_frame(d = df_arcs, directed = TRUE)
-#   girth_value <- girth(g)$girth
-#   print(paste("Girth value:", girth_value))
-#   return(girth_value > 0)
-# }
+   #print("hi there")
+   #print(temp_white_thresh)
 
-
-# if(has_cycles(temp_white_thresh) ) {
-#   print("INSIDE LOOP")
-#   print("Removing last arc to break cycle")
-  
-#   # Print temp_white_thresh before removing the last row
-#   print("Before removing last row:")
-#   print(temp_white_thresh)
-  
-#   # Remove the last row
-#   temp_white_thresh <- temp_white_thresh[-nrow(temp_white_thresh), ]
-  
-#   # Print temp_white_thresh after removing the last row
-#   print("After removing last row:")
-#   print(temp_white_thresh)
-
-# }
-# print("done with if statement")
- 
-    
-    
     # ---------------
-    # # Check for common arcs and remove them from whitelist
-    # common_arcs <- intersect(temp_white_thresh, Black_List)
-    # if(length(common_arcs) > 0) {
-    #   temp_white_thresh <- setdiff(temp_white_thresh, common_arcs)
-    # }
-
      # Remove common arcs with blacklist
     if (!is.null(Black_List) && nrow(Black_List) > 0 && nrow(temp_white_thresh) > 0) {
       common_arcs <- intersect(temp_white_thresh, Black_List)
@@ -104,30 +119,28 @@ break_cycles_in_df_edges <- function(df_edges) {
       }
     }
     # ---------------
-    
-print("alo 1")
-    
-    #-------------------------------------------- new 1
+   #print("alo 1")
+  #-------------------------------------------- 
     
     if ((!is.null(temp_white_thresh) && nrow(temp_white_thresh)> 0) &
         (!is.null(Black_List) && nrow(Black_List)> 0)) {
 
       arstr <- boot.strength(discretized_data, R = nboot, algorithm = "mmhc", cluster = cl,
                              algorithm.args = list(whitelist = temp_white_thresh, blacklist = Black_List))
-      print("block 1")
+       #print("block 1")
     } else if ((!is.null(temp_white_thresh) && nrow(temp_white_thresh)> 0)) {
       arstr <- boot.strength(discretized_data, R = nboot, algorithm = "mmhc", cluster = cl,
                              algorithm.args = list(whitelist = temp_white_thresh))
-      print("block 2")
+       #print("block 2")
         
     } else if((!is.null(Black_List) && nrow(Black_List)> 0)) {
       arstr <- boot.strength(discretized_data, R = nboot, algorithm = "mmhc", cluster = cl,
                              algorithm.args = list(blacklist = Black_List))
-      print("block 3")
+       #print("block 3")
 
     }
     
-print("alo 2")
+ #print("alo 2")
 
 
 # # Perform boot.strength with appropriate whitelists and blacklists
@@ -139,10 +152,10 @@ print("alo 2")
 #         arstr <- boot.strength(discretized_data, R = nboot, algorithm = "mmhc", cluster = cl,
 #                                algorithm.args = list(blacklist = Black_List))
 #       }
-#       print("alo2")
+#        #print("alo2")
 #     }, error = function(e) {
 #       print(paste("Error in boot.strength for threshold", threshold[i], ":", e$message))
-#       next  # Skip to the next iteration of the loop
+#       next  # Skip to next iteration of loop
 #     })
 
     #-------------------------------------------- new 2
@@ -170,23 +183,23 @@ print("alo 2")
   #   }
   # -------------------------------------------
     
-    suppressWarnings( # Use suppressWarnings to skip the warning
+    suppressWarnings( # Use suppressWarnings to skip warning
       ave.BRCA <- averaged.network(arstr)
     )
     
     arcs(ave.BRCA) <- directed.arcs(ave.BRCA)
     
-    # -------------- number of arcs in the DAG for each thershold
+    # -------------- number of arcs in DAG for each thershold
     
     num_arcs.All.thresh_name <- c(num_arcs.All.thresh_name , paste("thresh_# ", threshold[i], sep = ""))
     
-    num_arcs.thresh <- length(directed.arcs(ave.BRCA))  # add empty graph in the first element
+    num_arcs.thresh <- length(directed.arcs(ave.BRCA))  # add empty graph in first element
     num_arcs.All.thresh <- cbind(num_arcs.All.thresh, num_arcs.thresh)
     # --------------
     
-print("alo 3")
+ #print("alo 3")
 
-    fBRCABN <- bn.fit(ave.BRCA, data = discretized_data)
+    fBRCABN <- bn.fit(ave.BRCA, data = data)
     
     nodes = nodes(fBRCABN)
     parents_list_thresh  <- list()
@@ -224,7 +237,7 @@ print("alo 3")
     L1_list[[i]] <- data.frame(node = names(L1_BN), L1 = L1_BN)
     rownames(L1_list[[i]]) <- NULL
     colnames(L1_list[[i]])[2] <- L1_name
-print("alo 4")
+ #print("alo 4")
 
   }
   
@@ -232,7 +245,7 @@ print("alo 4")
   L1_BN_table <- Reduce(function(x, y) merge(x, y, by = "node", all = TRUE), L1_list)
   
   ng <- empty.graph(nodes = (as.character(colnames(discretized_data))))
-  fnBN <- bn.fit(ng, data = discretized_data)
+  fnBN <- bn.fit(ng, data = data)
   residnBN <- as.data.frame(residuals(fnBN))
   
   L1_nBN <- colSums(abs(residnBN)/nrow(discretized_data))
@@ -244,8 +257,8 @@ print("alo 4")
   L1_merged <- merge(L1_nBN, L1_BN_table, by = "node", all = TRUE)
   L1_merged[is.na(L1_merged)] <- 0
   # --------------
-  rownames(L1_merged) <- L1_merged$node  # Set the row names to the first column
-  L1_merged <- L1_merged[, -1]  # Remove the first column
+  rownames(L1_merged) <- L1_merged$node  # Set row names to first column
+  L1_merged <- L1_merged[, -1]  # Remove first column
   
 # --------------
   # ---------------------------
@@ -255,17 +268,12 @@ print("alo 4")
       L1_merged[[col]] <- as.numeric(sprintf("%.1f", L1_merged[[col]]))
     }
   }
-  
-  
   #---------------------------
-  
-  
-  
   npar_nBN <- data.frame(node = npar_table$node, npar_empty_graph = rep(0, length(npar_table$node)))
   npar_merged <- merge(npar_nBN, npar_table, by = "node", all = TRUE)
   # --------------
-  rownames(npar_merged) <- npar_merged$node  # Set the row names to the first column
-  npar_merged <- npar_merged[, -1]  # Remove the first column
+  rownames(npar_merged) <- npar_merged$node  # Set row names to first column
+  npar_merged <- npar_merged[, -1]  # Remove first column
   # --------------
 
   num_arcs.All.thresh_name <- c("thresh_#empty_graph", num_arcs.All.thresh_name)
@@ -279,8 +287,6 @@ print("alo 4")
   names(Total.BIC.thresh) <- num_arcs.All.thresh_name
   
   # -------------------
-  
-
   parents_list_name <- c("parent_list_empty_graph" , parents_list_name)
   
   parents_list_empty_graph <- vector(mode = "list", length = nrow(npar_merged))
@@ -292,11 +298,7 @@ print("alo 4")
   parents_list_merged <- c(list(parents_list_empty_graph), parents_list)
   names(parents_list_merged) <- parents_list_name
   
-  
-  # return(list(npar_merged = npar_merged, L1_merged = L1_merged,
-  #             parents_list_merged = parents_list_merged, 
-  #             num_arcs.All.thresh = num_arcs.All.thresh))
-print("alo finale")
+ #print("alo finale")
 
   # -------------------
   return(list(npar_merged = npar_merged, L1_merged = L1_merged,
@@ -307,17 +309,11 @@ print("alo finale")
   # -------------------
 }
 
-
-
 #--------------------------------------------------------------------------------------------
-# final with comment
-#--------------------------------------------------------------------------------------------
-
-# 
 # calculate_loss_npar_table <- function(threshold, temp_list_merge, discretized_data, nboot, cl, Black_List) {
 #   npar_list <- list()
 #   L1_list <- list()
-#   # initialize an empty list to store the results
+#   # initialize an empty list to store results
 #   parents_list = list()
 #   
 #   
@@ -325,8 +321,8 @@ print("alo finale")
 #   
 #   parents_list_name <- c()
 #   
-#   # Loop over the thresholds and create a data frame for each
-#   for (i in 1: length(threshold)) { # because the first list is for empty graph
+#   # Loop over thresholds and create data frame for each
+#   for (i in 1: length(threshold)) { # because first list is for empty graph
 #     temp_white_thresh <- as.data.frame(temp_list_merge[[i+1]], row.names = NULL)  
 #     if ((is.null(temp_list_merge[[i+1]]) || nrow(temp_list_merge[[i+1]]) == 0)){
 #       arstr <- boot.strength(discretized_data, R = nboot, algorithm = "mmhc", cluster = cl, 
@@ -344,20 +340,20 @@ print("alo finale")
 #     fBRCABN <- bn.fit(ave.BRCA, data = discretized_data)  # numbering for each threshold
 #     
 #     # ---------------- SAVING PARENTS OF EACH NODE
-#     # get all nodes in the graph
+#     # get all nodes in graph
 #     nodes = nodes(fBRCABN)
 #       
 #     parents_list_thresh = list()
 #     
-#     # loop through each node and store its parents in the list
+#     # loop through each node and store its parents in list
 #     for (node in nodes) {
 #       parents_list_thresh[[node]] = parents(fBRCABN, node)
 #     }
 #     
-#     # Name the first list "numbers" and the second list "letters"
+#     # Name first list "numbers" and second list "letters"
 #     parents_list_name <- c(parents_list_name , paste("parent_list_thresh_# ", threshold[i], sep = ""))
 #    
-#     parents_list[[i]] <- parents_list_thresh  # since i start from 2 because empty graph is a first list
+#     parents_list[[i]] <- parents_list_thresh  # since i start from 2 because empty graph is first list
 #     
 #         # ----------------
 #     
@@ -368,7 +364,7 @@ print("alo finale")
 #     #### Calculate L1 loss for each node
 #     residBN <- as.data.frame(residuals(fBRCABN)) # calculating residuals for each sample (58 samples SKCM) of each features (Cancer, CD4, CD8,..)\
 #     # residBN <- as.data.frame(lapply(residuals(fBRCABN), as.numeric))
-#     residBN <- select_if(residBN, is.numeric)  # newly added (the function colSums() can only be applied to data frames with all numeric variables. In this case, residBN may contain non-numeric columns, which is causing the error.
+#     residBN <- select_if(residBN, is.numeric)  # newly added (the function colSums() can only be applied to data frames with all numeric variables. In this case, residBN may contain non-numeric columns, which is causing error.
 #     
 #     # Check for non-numeric columns
 #     non_numeric_cols <- !sapply(residBN, is.numeric)
@@ -377,7 +373,7 @@ print("alo finale")
 #     }
 #     
 #     
-#     L1_BN <- colSums(abs(residBN)/nrow(discretized_data)) # divide the residual columns to the # of sample (normalization) ---->  then calculate sum of each column (Cancer, CD4, CD8,..)
+#     L1_BN <- colSums(abs(residBN)/nrow(discretized_data)) # divide residual columns to # of sample (normalization) ---->  then calculate sum of each column (Cancer, CD4, CD8,..)
 #     npar <- sapply(nodes(ave.BRCA), function(x) length(parents(fBRCABN,x)))
 #     
 #     npar_name <- paste("npar_thresh_# ", threshold[i], sep = "")
@@ -391,7 +387,7 @@ print("alo finale")
 #     colnames(L1_list[[i]])[2] <- L1_name
 #   }
 #   
-#   # Merge all the data frames in the list based on the "node" column
+#   # Merge all data frames in list based on "node" column
 #   npar_table <- Reduce(function(x, y) merge(x, y, by = "node", all = TRUE), npar_list)
 #   L1_BN_table <- Reduce(function(x, y) merge(x, y, by = "node", all = TRUE), L1_list)
 #   
@@ -411,7 +407,7 @@ print("alo finale")
 #   L1_nBN <- data.frame(node = L1_BN_table$node, L1_empty = L1_nBN)
 #   # L1_nBN <- data.frame(node = names(L1_nBN), L1_empty = rep(0, length(L1_nBN)))
 #   # L1_nBN <- data.frame(node = names(L1_nBN), L1_empty = as.numeric(L1_nBN), stringsAsFactors = FALSE)
-#     # Merge L1_nBN and L1_BN_table on the "node" column
+#     # Merge L1_nBN and L1_BN_table on "node" column
 #   L1_merged <- merge(L1_nBN, L1_BN_table, by = "node", all = TRUE)
 #   # L1_merged <- merge(L1_nBN, L1_BN_table, by = "node", all.x = TRUE)
 # 
@@ -426,7 +422,7 @@ print("alo finale")
 #   # Replace any missing values with 0
 #   # npar_merged[is.na(npar_merged)] <- 0
 # 
-#    # Return a list of the two data frames
+#    # Return list of two data frames
 #   
 #   # ------------------------
 #   # adding BIC score for each threshold 
@@ -434,16 +430,16 @@ print("alo finale")
 #   # --------------------- to assign name to each list of "parents_list_thresh"
 #   parents_list_name <- c("parent_list_empty_graph" , parents_list_name)
 #   
-#   #  making a list with Zero value as zero parents for each node for an empty graph
+#   #  making list with Zero value as zero parents for each node for an empty graph
 #   # parents_list_empty_graph <- lapply(vector("list", length(npar_table$node)), function(x) 0) ########????????????????????????????
 #   # parents_list_empty_graph <- setNames(rep(list(0), nrow(npar_merged), npar_merged$node))
 #   # parents_list_empty_graph <- replicate(length(npar_table$node), 0, simplify = FALSE)
 #   # ------------
 #   
-#             # Create a list of length equal to the number of rows in npar_merged
+#             # Create list of length equal to number of rows in npar_merged
 #             parents_list_empty_graph <- vector(mode = "list", length = nrow(npar_merged))
 # 
-#             # Set the names of the list elements to the values in rownames(npar_merged)
+#             # Set names of list elements to values in rownames(npar_merged)
 #             names(parents_list_empty_graph) <- npar_merged$node
 # 
 #             # Set each list element to 0
@@ -452,11 +448,11 @@ print("alo finale")
 #   # ------------
 #   # parents_list_empty_graph <- setNames(rep(list(0), nrow(npar_merged), npar_merged$node))
 #   # ------------
-#   parents_list_merged <- c(list(parents_list_empty_graph), parents_list)  # add the new list for empty graph to the "list of list"
+#   parents_list_merged <- c(list(parents_list_empty_graph), parents_list)  # add new list for empty graph to "list of list"
 #   
 #   names(parents_list_merged) <- parents_list_name
 #   
-#   # Access the "numbers" list inside my_list
+#   # Access "numbers" list inside my_list
 #   # parents_list_merged[["parents_list_thresh....."]]
 #   
 #   # ---------------------
@@ -469,26 +465,8 @@ print("alo finale")
 #   
 # }
 
-
-
-
-
-
-
-
-
 #--------------------------------------------------------------------------------------------
-#--------------------------------------------------------------------------------------------
-
-
-
-
-
-#--------------------------------------------------------------------------------------------
-#--------------------------------------------------------------------------------------------
-
-# 2 Original code: worked for making table for number of parent and L1 loss
-#--------------------------------------------------------------------------------------------
+# for making table for number of parent and L1 loss
 #--------------------------------------------------------------------------------------------
 
 # calculate_loss_npar_table <- function(threshold, temp_list_merge, discretized_data, nboot, cl, Black_List) {
@@ -497,7 +475,7 @@ print("alo finale")
 #   
 #   threshold <- c(0, threshold)  # add zero threshold
 #   
-#   # Loop over the thresholds and create a data frame for each
+#   # Loop over thresholds and create data frame for each
 #   for (i in seq_along(threshold)) {
 #     temp_white_thresh <- as.data.frame(temp_list_merge[[i]], row.names = NULL)
 #     if ((is.null(temp_list_merge[[1]]) || nrow(temp_list_merge[[1]]) == 0)){
@@ -523,7 +501,7 @@ print("alo finale")
 #     #### Calculate L1 loss for each node
 #     residBN <- as.data.frame(residuals(fBRCABN)) # calculating residuals for each sample (58 samples SKCM) of each features (Cancer, CD4, CD8,..)\
 #     # residBN <- as.data.frame(lapply(residuals(fBRCABN), as.numeric))
-#     residBN <- select_if(residBN, is.numeric)  # newly added (the function colSums() can only be applied to data frames with all numeric variables. In this case, residBN may contain non-numeric columns, which is causing the error.
+#     residBN <- select_if(residBN, is.numeric)  # newly added (the function colSums() can only be applied to data frames with all numeric variables. In this case, residBN may contain non-numeric columns, which is causing error.
 #     
 #     # Check for non-numeric columns
 #     non_numeric_cols <- !sapply(residBN, is.numeric)
@@ -531,7 +509,7 @@ print("alo finale")
 #       residBN[, non_numeric_cols] <- lapply(residBN[, non_numeric_cols], as.numeric)
 #     }
 #     
-#     L1_BN <- colSums(abs(residBN)/nrow(discretized_data)) # divide the residual columns to the # of sample (normalization) ---->  then calculate sum of each column (Cancer, CD4, CD8,..)
+#     L1_BN <- colSums(abs(residBN)/nrow(discretized_data)) # divide residual columns to # of sample (normalization) ---->  then calculate sum of each column (Cancer, CD4, CD8,..)
 #     npar <- sapply(nodes(ave.BRCA), function(x) length(parents(fBRCABN,x)))
 #     
 #     npar_name <- paste("npar_thresh_# ", format(threshold[i], scientific = TRUE), sep = "")
@@ -545,7 +523,7 @@ print("alo finale")
 #     colnames(L1_list[[i]])[2] <- L1_name
 #   }
 #   
-#   # Merge all the data frames in the list based on the "node" column
+#   # Merge all data frames in list based on "node" column
 #   npar_table <- Reduce(function(x, y) merge(x, y, by = "node", all = TRUE), npar_list)
 #   L1_BN_table <- Reduce(function(x, y) merge(x, y, by = "node", all = TRUE), L1_list)
 #   
@@ -562,7 +540,7 @@ print("alo finale")
 #   L1_nBN <- data.frame(node = L1_BN_table$node, L1_empty = L1_nBN)
 #   # L1_nBN <- data.frame(node = names(L1_nBN), L1_empty = rep(0, length(L1_nBN)))
 #   # L1_nBN <- data.frame(node = names(L1_nBN), L1_empty = as.numeric(L1_nBN), stringsAsFactors = FALSE)
-#   # Merge L1_nBN and L1_BN_table on the "node" column
+#   # Merge L1_nBN and L1_BN_table on "node" column
 #   L1_merged <- merge(L1_nBN, L1_BN_table, by = "node", all = TRUE)
 #   # L1_merged <- merge(L1_nBN, L1_BN_table, by = "node", all.x = TRUE)
 #   
@@ -577,13 +555,10 @@ print("alo finale")
 #   # Replace any missing values with 0
 #   # npar_merged[is.na(npar_merged)] <- 0
 #   
-#   # Return a list of the two data frames
+#   # Return list of two data frames
 #   
 #   # ------------------------
 #   # adding BIC score for each threshold 
-#   
-#   
-#   
 #   # ------------------------
 #   return(list(npar_merged = npar_merged, L1_merged = L1_merged))
 #   
@@ -591,16 +566,9 @@ print("alo finale")
 #   # return(list(npar_table = npar_table, L1_BN_table = L1_BN_table))
 #   
 # }
-
-# 
-
 #--------------------------------------------------------------------------------------------
+# making table for number of parent and L1 loss
 #--------------------------------------------------------------------------------------------
-
-# 1 Original code: worked for making table for number of parent and L1 loss
-#--------------------------------------------------------------------------------------------
-#--------------------------------------------------------------------------------------------
-
 
 # calculate_loss_npar_table <- function(threshold, temp_list_merge, discretized_data, nboot, cl, Black_List) {
 #   npar_list <- list()
@@ -608,7 +576,7 @@ print("alo finale")
 #   
 #   threshold <- c(0, threshold)  # add zero threshold
 #   
-#   # Loop over the thresholds and create a data frame for each
+#   # Loop over thresholds and create data frame for each
 #   for (i in seq_along(threshold)) {
 #     temp_white_thresh <- as.data.frame(temp_list_merge[[i]], row.names = NULL)
 #     if ((is.null(temp_list_merge[[1]]) || nrow(temp_list_merge[[1]]) == 0)){
@@ -634,7 +602,7 @@ print("alo finale")
 #     #### Calculate L1 loss for each node
 #     residBN <- as.data.frame(residuals(fBRCABN)) # calculating residuals for each sample (58 samples SKCM) of each features (Cancer, CD4, CD8,..)\
 #     # residBN <- as.data.frame(lapply(residuals(fBRCABN), as.numeric))
-#     residBN <- select_if(residBN, is.numeric)  # newly added (the function colSums() can only be applied to data frames with all numeric variables. In this case, residBN may contain non-numeric columns, which is causing the error.
+#     residBN <- select_if(residBN, is.numeric)  # newly added (the function colSums() can only be applied to data frames with all numeric variables. In this case, residBN may contain non-numeric columns, which is causing error.
 #     
 #     # Check for non-numeric columns
 #     non_numeric_cols <- !sapply(residBN, is.numeric)
@@ -642,7 +610,7 @@ print("alo finale")
 #       residBN[, non_numeric_cols] <- lapply(residBN[, non_numeric_cols], as.numeric)
 #     }
 #     
-#     L1_BN <- colSums(abs(residBN)/nrow(discretized_data)) # divide the residual columns to the # of sample (normalization) ---->  then calculate sum of each column (Cancer, CD4, CD8,..)
+#     L1_BN <- colSums(abs(residBN)/nrow(discretized_data)) # divide residual columns to # of sample (normalization) ---->  then calculate sum of each column (Cancer, CD4, CD8,..)
 #     npar <- sapply(nodes(ave.BRCA), function(x) length(parents(fBRCABN,x)))
 #     
 #     npar_name <- paste("npar_thresh_# ", format(threshold[i], scientific = TRUE), sep = "")
@@ -656,7 +624,7 @@ print("alo finale")
 #     colnames(L1_list[[i]])[2] <- L1_name
 #   }
 #   
-#   # Merge all the data frames in the list based on the "node" column
+#   # Merge all data frames in list based on "node" column
 #   npar_table <- Reduce(function(x, y) merge(x, y, by = "node", all = TRUE), npar_list)
 #   L1_BN_table <- Reduce(function(x, y) merge(x, y, by = "node", all = TRUE), L1_list)
 #   
@@ -673,7 +641,7 @@ print("alo finale")
 #   L1_nBN <- data.frame(node = L1_BN_table$node, L1_empty = rep(0, length(L1_BN_table$node)))
 #   # L1_nBN <- data.frame(node = names(L1_nBN), L1_empty = rep(0, length(L1_nBN)))
 #   # L1_nBN <- data.frame(node = names(L1_nBN), L1_empty = as.numeric(L1_nBN), stringsAsFactors = FALSE)
-#   # Merge L1_nBN and L1_BN_table on the "node" column
+#   # Merge L1_nBN and L1_BN_table on "node" column
 #   L1_merged <- merge(L1_nBN, L1_BN_table, by = "node", all = TRUE)
 #   # L1_merged <- merge(L1_nBN, L1_BN_table, by = "node", all.x = TRUE)
 #   
@@ -688,13 +656,10 @@ print("alo finale")
 #   # Replace any missing values with 0
 #   # npar_merged[is.na(npar_merged)] <- 0
 #   
-#   # Return a list of the two data frames
+#   # Return list of two data frames
 #   return(list(npar_merged = npar_merged, L1_merged = L1_merged))
 #   
 #   
 #   # return(list(npar_table = npar_table, L1_BN_table = L1_BN_table))
 #   
 # }
-
-#--------------------------------------------------------------------------------------------
-#--------------------------------------------------------------------------------------------
